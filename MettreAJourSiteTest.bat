@@ -1,6 +1,6 @@
 @echo off
 echo ========================================
-echo    MISE A JOUR DU SITE ORORA
+echo    MISE A JOUR DU SITE ORORA (TEST)
 echo ========================================
 echo.
 
@@ -12,16 +12,16 @@ git add .
 
 echo.
 echo [2/3] Creation du commit...
-git commit -m "Mise a jour des donnees Orora - %date% %time%"
+git commit -m "Test - Mise a jour Orora - %date% %time%"
 
 echo.
 echo [3/3] Envoi vers GitHub...
-git push origin main
+git push origin master
 
 echo.
 echo ========================================
 echo    MISE A JOUR TERMINEE !
-echo    Le site sera a jour dans 30 secondes
+echo    Le site TEST sera a jour dans 30 sec
 echo ========================================
 echo.
 pause
