@@ -1,0 +1,4609 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ORORA</title>
+    
+    <!-- PWA Meta Tags -->
+    <meta name="description" content="Jeu interactif Twitch - Statistiques, classements et lore d'Orora">
+    <meta name="theme-color" content="#1a1a2e">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="ORORA">
+    
+    <!-- PWA Manifest -->
+    <link rel="manifest" href="manifest.json">
+    
+    <!-- Favicon et icônes -->
+    <link rel="icon" type="image/png" href="icons/IconApp.png">
+    <link rel="apple-touch-icon" href="icons/AppImages/ios/180.png">
+    
+    <!-- Google Fonts - Polices modernes -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+    
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Poppins', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #0a0a0a 0%, #1a1a2e 100%);
+            color: #ffffff;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        h1, h2, h3, .nav-btn, .menu-text {
+            font-family: 'Bebas Neue', 'Arial Black', sans-serif;
+            letter-spacing: 1px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .loading {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .loading img {
+            max-width: 150px;
+            width: 40%;
+            height: auto;
+        }
+
+        header {
+            text-align: center;
+            padding: 30px 20px 10px;
+            margin-bottom: 45px;
+        }
+
+        .logo {
+            max-width: 500px;
+            width: 100%;
+            height: auto;
+            margin-bottom: 20px;
+            filter: drop-shadow(0 0 30px rgba(255, 255, 255, 0.4));
+        }
+
+        /* Navigation - Barre moderne */
+        .nav-menu {
+            display: flex;
+            justify-content: center;
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 50px;
+            padding: 10px;
+            margin: 0 auto 0;
+            max-width: fit-content;
+            gap: 8px;
+        }
+
+        .nav-btn {
+            position: relative;
+            padding: 15px 32px;
+            background: transparent;
+            border: none;
+            border-radius: 40px;
+            color: rgba(255, 255, 255, 0.7);
+            font-size: 1.4em;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 400;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            overflow: hidden;
+        }
+
+        .nav-btn .nav-icon {
+            width: 26px;
+            height: 26px;
+            object-fit: contain;
+            filter: brightness(0.7);
+            transition: filter 0.3s ease;
+        }
+
+        .nav-btn:hover .nav-icon,
+        .nav-btn.active .nav-icon {
+            filter: brightness(1);
+        }
+
+        /* Effet holographique au hover */
+        .nav-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(
+                90deg,
+                transparent,
+                rgba(255, 255, 255, 0.1),
+                rgba(255, 100, 200, 0.15),
+                rgba(100, 200, 255, 0.15),
+                rgba(255, 255, 100, 0.1),
+                transparent
+            );
+            transition: left 0.5s ease;
+            border-radius: 40px;
+        }
+
+        .nav-btn:hover::before {
+            left: 100%;
+        }
+
+        .nav-btn:hover {
+            color: #ffffff;
+            background: rgba(255, 255, 255, 0.08);
+        }
+
+        .nav-btn.active {
+            background: rgba(255, 255, 255, 0.15);
+            color: #ffffff;
+            box-shadow: 0 0 20px rgba(255, 255, 255, 0.1),
+                        inset 0 0 20px rgba(255, 255, 255, 0.05);
+        }
+
+        .nav-btn.active::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 30px;
+            height: 3px;
+            background: linear-gradient(90deg, #ff6ec7, #7873f5, #4aeadc);
+            border-radius: 3px;
+        }
+
+        /* Pages */
+        .page {
+            display: none;
+        }
+
+        .page.active {
+            display: block;
+        }
+
+        /* Page Personnages - Styles existants */
+        .search-container {
+            max-width: 600px;
+            margin: 0 auto 30px;
+            position: relative;
+            display: flex;
+            align-items: center;
+        }
+
+        .search-icon {
+            position: absolute;
+            left: 15px;
+            width: 20px;
+            height: 20px;
+            object-fit: contain;
+            opacity: 0.6;
+            pointer-events: none;
+        }
+
+        #searchInput {
+            width: 100%;
+            padding: 15px 20px 15px 50px;
+            font-size: 1.1em;
+            border: 2px solid #333;
+            border-radius: 10px;
+            background: rgba(255, 255, 255, 0.05);
+            color: #ffffff;
+            transition: all 0.3s ease;
+        }
+
+        #searchInput:focus {
+            outline: none;
+            border-color: rgba(255, 255, 255, 0.3);
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        #searchInput::placeholder {
+            color: #888;
+        }
+
+        .character-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 25px;
+            margin-bottom: 40px;
+        }
+
+        .character-card {
+            position: relative;
+            aspect-ratio: 3 / 4;
+            border-radius: 15px;
+            cursor: pointer;
+            perspective: 1000px;
+        }
+
+        .character-card-inner {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            transition: transform 0.8s ease;
+            transform-style: preserve-3d;
+            transform: rotateY(180deg);
+        }
+
+        .character-card.revealed .character-card-inner {
+            transform: rotateY(0deg);
+        }
+
+        /* Effet 3D au hover - géré par JS */
+        .character-card.revealed .character-card-inner.tilt {
+            transition: transform 0.1s ease-out;
+        }
+
+        .character-card-front,
+        .character-card-back {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            border-radius: 15px;
+            backface-visibility: hidden;
+            -webkit-backface-visibility: hidden;
+            overflow: hidden;
+            transition: box-shadow 0.3s ease;
+        }
+
+        .character-card-front {
+            z-index: 2;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.4);
+        }
+
+        .character-card-back {
+            transform: rotateY(180deg);
+            z-index: 1;
+        }
+
+        .character-card-back img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            border-radius: 15px;
+        }
+
+        .character-card-front::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(to bottom, transparent 0%, transparent 50%, rgba(0, 0, 0, 0.95) 100%);
+            z-index: 1;
+            border-radius: 15px;
+        }
+
+        .character-card-bg {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            border-radius: 15px;
+        }
+
+        .character-card-content {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            padding: 20px;
+            z-index: 2;
+        }
+
+        /* Lueur des factions - seulement au hover */
+        .character-card.alliance:hover .character-card-front {
+            box-shadow: 0 0 25px rgba(52, 152, 219, 0.7),
+                        0 0 50px rgba(52, 152, 219, 0.4),
+                        0 10px 30px rgba(0, 0, 0, 0.5);
+        }
+
+        .character-card.rebellion:hover .character-card-front {
+            box-shadow: 0 0 25px rgba(231, 76, 60, 0.7),
+                        0 0 50px rgba(231, 76, 60, 0.4),
+                        0 10px 30px rgba(0, 0, 0, 0.5);
+        }
+
+        .character-card.trefonds:hover .character-card-front {
+            box-shadow: 0 0 25px rgba(46, 204, 113, 0.7),
+                        0 0 50px rgba(46, 204, 113, 0.4),
+                        0 10px 30px rgba(0, 0, 0, 0.5);
+        }
+
+        /* Dos de carte - pas de lueur */
+        .character-card-back {
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.4);
+        }
+
+        .character-card h3 {
+            font-size: 1.5em;
+            margin-bottom: 8px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.8);
+        }
+
+        .character-card-info {
+            font-size: 0.95em;
+            color: #ddd;
+            text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.8);
+        }
+
+        .faction-badge {
+            display: inline-block;
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-size: 0.9em;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+
+        .faction-badge.alliance {
+            background: #3498db;
+        }
+
+        .faction-badge.rebellion {
+            background: #e74c3c;
+        }
+
+        .faction-badge.trefonds {
+            background: #2ecc71;
+        }
+
+        .character-detail {
+            display: none;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 15px;
+            padding: 30px;
+            margin-bottom: 40px;
+            border: 3px solid;
+            position: relative;
+        }
+
+        .close-detail-btn {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            width: 35px;
+            height: 35px;
+            border: none;
+            background: rgba(255, 255, 255, 0.1);
+            color: #fff;
+            font-size: 1.5em;
+            border-radius: 50%;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            line-height: 1;
+            z-index: 10;
+        }
+
+        .close-detail-btn:hover {
+            background: rgba(231, 76, 60, 0.8);
+            transform: scale(1.1);
+        }
+
+        .character-detail.alliance {
+            border-color: #3498db;
+        }
+
+        .character-detail.rebellion {
+            border-color: #e74c3c;
+        }
+
+        .character-detail.trefonds {
+            border-color: #2ecc71;
+        }
+
+        .detail-header {
+            display: flex;
+            gap: 30px;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+        }
+
+        .card-image {
+            width: 300px;
+            height: 400px;
+            border-radius: 10px;
+            object-fit: cover;
+            border: 3px solid;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+            cursor: pointer;
+            transition: transform 0.3s ease;
+        }
+
+        .card-image:hover {
+            transform: scale(1.02);
+        }
+
+        /* Lightbox pour afficher la carte en grand */
+        .lightbox {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.95);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            perspective: 1000px;
+        }
+
+        .lightbox.active {
+            display: flex;
+        }
+
+        .lightbox-card-container {
+            position: relative;
+            transform-style: preserve-3d;
+            transition: transform 0.1s ease-out;
+            cursor: grab;
+        }
+
+        .lightbox-card-container:active {
+            cursor: grabbing;
+        }
+
+        .lightbox-card-container img {
+            max-width: 85vw;
+            max-height: 85vh;
+            border-radius: 15px;
+            box-shadow: 0 25px 80px rgba(0, 0, 0, 0.8);
+            display: block;
+        }
+
+        /* Effet holographique / brillant */
+        .holographic-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            border-radius: 15px;
+            pointer-events: none;
+            background: linear-gradient(
+                125deg,
+                transparent 0%,
+                transparent 25%,
+                rgba(255, 255, 255, 0.1) 25%,
+                rgba(255, 255, 255, 0.3) 30%,
+                transparent 35%,
+                transparent 100%
+            );
+            background-size: 200% 200%;
+            mix-blend-mode: overlay;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .lightbox-card-container:hover .holographic-overlay,
+        .lightbox-card-container.active .holographic-overlay {
+            opacity: 1;
+        }
+
+        /* Reflet arc-en-ciel holographique */
+        .rainbow-shine {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            border-radius: 15px;
+            pointer-events: none;
+            background: linear-gradient(
+                var(--shine-angle, 135deg),
+                transparent 0%,
+                rgba(255, 0, 128, 0.15) 15%,
+                rgba(0, 255, 255, 0.15) 30%,
+                rgba(255, 255, 0, 0.15) 45%,
+                rgba(0, 255, 128, 0.15) 60%,
+                rgba(128, 0, 255, 0.15) 75%,
+                transparent 100%
+            );
+            mix-blend-mode: color-dodge;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .lightbox-card-container:hover .rainbow-shine,
+        .lightbox-card-container.active .rainbow-shine {
+            opacity: 1;
+        }
+
+        /* Reflet de lumière */
+        .light-reflection {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            border-radius: 15px;
+            pointer-events: none;
+            background: radial-gradient(
+                circle at var(--mouse-x, 50%) var(--mouse-y, 50%),
+                rgba(255, 255, 255, 0.4) 0%,
+                rgba(255, 255, 255, 0.1) 20%,
+                transparent 50%
+            );
+            mix-blend-mode: overlay;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .lightbox-card-container:hover .light-reflection,
+        .lightbox-card-container.active .light-reflection {
+            opacity: 1;
+        }
+
+        .lightbox-close {
+            position: absolute;
+            top: 20px;
+            right: 30px;
+            font-size: 3em;
+            color: white;
+            cursor: pointer;
+            transition: transform 0.3s ease;
+            z-index: 1001;
+        }
+
+        .lightbox-close:hover {
+            transform: scale(1.2);
+        }
+
+        .card-image.alliance {
+            border-color: #3498db;
+        }
+
+        .card-image.rebellion {
+            border-color: #e74c3c;
+        }
+
+        .card-image.trefonds {
+            border-color: #2ecc71;
+        }
+
+        .detail-info {
+            flex: 1;
+            min-width: 300px;
+        }
+
+        .detail-info h2 {
+            font-size: 2.5em;
+            margin-bottom: 20px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+        }
+
+        .rank-badge {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin: 15px 0;
+            padding: 10px 20px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 10px;
+            width: fit-content;
+        }
+
+        .rank-icon {
+            width: 40px;
+            height: 40px;
+            object-fit: contain;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .stat-box {
+            background: rgba(255, 255, 255, 0.05);
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+            border: 2px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .stat-label {
+            font-size: 1.1em;
+            color: #888;
+            margin-bottom: 10px;
+        }
+
+        .stat-value {
+            font-size: 2em;
+            font-weight: bold;
+        }
+
+        /* Titres de section avec icônes */
+        .section-title {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 15px;
+            font-size: 1.5em;
+            color: #ffffff;
+        }
+
+        .section-icon {
+            width: 28px;
+            height: 28px;
+            object-fit: contain;
+        }
+
+        .description-box {
+            background: rgba(255, 255, 255, 0.05);
+            padding: 25px;
+            border-radius: 10px;
+            margin-bottom: 30px;
+            border: 2px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .description-box h3 {
+            margin-bottom: 15px;
+            font-size: 1.5em;
+            color: #ffffff;
+        }
+
+        .equipped-weapon-section {
+            margin-bottom: 30px;
+        }
+
+        .equipped-weapon-title {
+            font-size: 1.5em;
+            margin-bottom: 15px;
+            color: #ffffff;
+        }
+
+        .equipped-weapon-card {
+            position: relative;
+            background: rgba(255, 255, 255, 0.05);
+            border: 2px solid rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            padding: 15px;
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            width: fit-content;
+            max-width: 100%;
+        }
+
+        .equipped-weapon-card .weapon-event-badge {
+            position: absolute;
+            top: -8px;
+            right: -8px;
+            background: linear-gradient(135deg, #c41e3a, #228b22);
+            color: white;
+            font-size: 0.7em;
+            padding: 3px 8px;
+            border-radius: 10px;
+            font-weight: bold;
+            z-index: 1;
+        }
+
+        .equipped-weapon-card.legendaire {
+            box-shadow: 0 0 30px rgba(243, 156, 18, 0.6);
+            border-color: #f39c12;
+            background: rgba(243, 156, 18, 0.1);
+        }
+
+        .equipped-weapon-card.epique {
+            border-color: rgba(155, 89, 182, 0.6);
+            background: rgba(155, 89, 182, 0.1);
+        }
+
+        .equipped-weapon-card.rare {
+            border-color: rgba(52, 152, 219, 0.6);
+            background: rgba(52, 152, 219, 0.1);
+        }
+
+        .equipped-weapon-card.commune {
+            border-color: rgba(136, 136, 136, 0.4);
+            background: rgba(136, 136, 136, 0.08);
+        }
+
+        .equipped-weapon-card.master {
+            animation: rainbow-glow 3s infinite;
+            border: 2px solid;
+            background: rgba(255, 20, 147, 0.1);
+        }
+
+        @keyframes rainbow-glow {
+            0%, 100% { 
+                border-color: #ff1493; 
+                box-shadow: 0 0 30px rgba(255, 20, 147, 0.8);
+            }
+            25% { 
+                border-color: #00ffff; 
+                box-shadow: 0 0 30px rgba(0, 255, 255, 0.8);
+            }
+            50% { 
+                border-color: #ffff00; 
+                box-shadow: 0 0 30px rgba(255, 255, 0, 0.8);
+            }
+            75% { 
+                border-color: #00ff00; 
+                box-shadow: 0 0 30px rgba(0, 255, 0, 0.8);
+            }
+        }
+
+        .equipped-weapon-image {
+            width: 140px;
+            height: 140px;
+            object-fit: contain;
+            border-radius: 8px;
+            background: rgba(0, 0, 0, 0.3);
+            padding: 10px;
+        }
+
+        .equipped-weapon-info {
+            flex: 1;
+        }
+
+        .equipped-weapon-name {
+            font-size: 1.4em;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+
+        .equipped-weapon-rarity {
+            display: inline-block;
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-size: 0.9em;
+            font-weight: bold;
+        }
+
+        .weapons-section {
+            margin-top: 30px;
+        }
+
+        .weapons-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .weapon-card {
+            position: relative;
+            background: rgba(255, 255, 255, 0.05);
+            border: 2px solid rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            padding: 10px;
+            text-align: center;
+            transition: transform 0.3s ease;
+        }
+
+        .weapon-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .weapon-card .weapon-event-badge {
+            position: absolute;
+            top: 5px;
+            right: 5px;
+            background: linear-gradient(135deg, #c41e3a, #228b22);
+            color: white;
+            font-size: 0.6em;
+            padding: 2px 6px;
+            border-radius: 8px;
+            font-weight: bold;
+            z-index: 1;
+        }
+
+        .weapon-card.legendaire {
+            box-shadow: 0 0 20px rgba(243, 156, 18, 0.6);
+            border-color: #f39c12;
+            background: rgba(243, 156, 18, 0.1);
+        }
+
+        .weapon-card.epique {
+            border-color: rgba(155, 89, 182, 0.6);
+            background: rgba(155, 89, 182, 0.1);
+        }
+
+        .weapon-card.rare {
+            border-color: rgba(52, 152, 219, 0.6);
+            background: rgba(52, 152, 219, 0.1);
+        }
+
+        .weapon-card.commune {
+            border-color: rgba(136, 136, 136, 0.4);
+            background: rgba(136, 136, 136, 0.08);
+        }
+
+        .weapon-card.master {
+            animation: rainbow-glow 3s infinite;
+            border: 2px solid;
+            background: rgba(255, 20, 147, 0.1);
+        }
+
+        .weapon-image {
+            width: 100%;
+            height: 120px;
+            object-fit: contain;
+            margin-bottom: 10px;
+            border-radius: 5px;
+            background: rgba(0, 0, 0, 0.3);
+            padding: 5px;
+        }
+
+        .weapon-name {
+            font-size: 0.9em;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+
+        .weapon-rarity {
+            display: inline-block;
+            padding: 3px 10px;
+            border-radius: 12px;
+            font-size: 0.75em;
+            font-weight: bold;
+        }
+
+        .close-btn {
+            background: #e74c3c;
+            color: white;
+            border: none;
+            padding: 15px 40px;
+            font-size: 1.1em;
+            border-radius: 10px;
+            cursor: pointer;
+            margin-top: 30px;
+            transition: all 0.3s ease;
+            display: block;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .close-btn:hover {
+            background: #c0392b;
+            transform: scale(1.05);
+        }
+
+        .no-results {
+            text-align: center;
+            padding: 60px 20px;
+            color: #888;
+            font-size: 1.2em;
+        }
+
+        /* Page Classement - Recherche */
+        .ranking-search-container {
+            max-width: 500px;
+            margin: 0 auto 20px auto;
+            padding: 0 15px;
+        }
+
+        .ranking-search {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 30px;
+            padding: 12px 20px 12px 50px;
+            position: relative;
+        }
+
+        .ranking-search .search-icon {
+            position: absolute;
+            left: 18px;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 20px;
+            height: 20px;
+            opacity: 0.5;
+        }
+
+        .ranking-search input {
+            width: 100%;
+            background: transparent;
+            border: none;
+            color: white;
+            font-size: 1em;
+            outline: none;
+        }
+
+        .ranking-search input::placeholder {
+            color: rgba(255, 255, 255, 0.4);
+        }
+
+        /* Page Classement - Filtres style menu */
+        .filters-container {
+            display: flex;
+            justify-content: center;
+            gap: 30px;
+            margin-bottom: 25px;
+            max-width: 1000px;
+            margin-left: auto;
+            margin-right: auto;
+            flex-wrap: wrap;
+        }
+
+        .filter-section {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .filter-section-title {
+            font-family: 'Bebas Neue', sans-serif;
+            font-size: 1.1em;
+            color: rgba(255, 255, 255, 0.6);
+            letter-spacing: 1px;
+            text-align: center;
+        }
+
+        .filter-buttons {
+            display: flex;
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 40px;
+            padding: 6px;
+            gap: 5px;
+        }
+
+        .filter-btn {
+            position: relative;
+            padding: 10px 20px;
+            background: transparent;
+            border: none;
+            border-radius: 30px;
+            color: rgba(255, 255, 255, 0.5);
+            font-family: 'Bebas Neue', sans-serif;
+            font-size: 1.1em;
+            letter-spacing: 1px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            overflow: hidden;
+        }
+
+        .filter-icon {
+            width: 20px;
+            height: 20px;
+            object-fit: contain;
+            filter: brightness(0.5);
+            transition: filter 0.3s ease;
+        }
+
+        .filter-btn:hover .filter-icon,
+        .filter-btn.active .filter-icon {
+            filter: brightness(1);
+        }
+
+        /* Effet holographique */
+        .filter-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(
+                90deg,
+                transparent,
+                rgba(255, 255, 255, 0.1),
+                rgba(255, 100, 200, 0.15),
+                rgba(100, 200, 255, 0.15),
+                rgba(255, 255, 100, 0.1),
+                transparent
+            );
+            transition: left 0.5s ease;
+            border-radius: 30px;
+        }
+
+        .filter-btn:hover::before {
+            left: 100%;
+        }
+
+        .filter-btn:hover {
+            color: rgba(255, 255, 255, 0.8);
+        }
+
+        /* Boutons de faction avec couleurs */
+        .faction-btn.alliance.active {
+            background: rgba(52, 152, 219, 0.3);
+            color: #3498db;
+            box-shadow: 0 0 15px rgba(52, 152, 219, 0.3);
+        }
+
+        .faction-btn.rebellion.active {
+            background: rgba(231, 76, 60, 0.3);
+            color: #e74c3c;
+            box-shadow: 0 0 15px rgba(231, 76, 60, 0.3);
+        }
+
+        .faction-btn.trefonds.active {
+            background: rgba(46, 204, 113, 0.3);
+            color: #2ecc71;
+            box-shadow: 0 0 15px rgba(46, 204, 113, 0.3);
+        }
+
+        /* Boutons de tri */
+        .sort-btn.active {
+            background: rgba(255, 255, 255, 0.15);
+            color: #ffffff;
+            box-shadow: 0 0 15px rgba(255, 255, 255, 0.1);
+        }
+
+        .sort-btn.active::after {
+            content: '';
+            position: absolute;
+            bottom: 2px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 20px;
+            height: 2px;
+            background: linear-gradient(90deg, #ff6ec7, #7873f5, #4aeadc);
+            border-radius: 2px;
+        }
+
+        /* Classement - Design avec cartes */
+        .ranking-table {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        .ranking-row {
+            display: grid;
+            grid-template-columns: 50px 80px 1fr auto;
+            align-items: center;
+            padding: 15px 20px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 15px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            transition: all 0.3s ease;
+            cursor: pointer;
+            gap: 15px;
+        }
+
+        .ranking-row:hover {
+            background: rgba(255, 255, 255, 0.1);
+            transform: translateX(5px);
+        }
+
+        .ranking-row.header {
+            display: none;
+        }
+
+        /* Top 3 styles */
+        .ranking-row.top1-row {
+            background: linear-gradient(135deg, rgba(243, 156, 18, 0.2) 0%, rgba(243, 156, 18, 0.05) 100%);
+            border: 2px solid rgba(243, 156, 18, 0.5);
+            box-shadow: 0 0 20px rgba(243, 156, 18, 0.2);
+        }
+
+        .ranking-row.top2-row {
+            background: linear-gradient(135deg, rgba(192, 192, 192, 0.2) 0%, rgba(192, 192, 192, 0.05) 100%);
+            border: 2px solid rgba(192, 192, 192, 0.5);
+            box-shadow: 0 0 20px rgba(192, 192, 192, 0.2);
+        }
+
+        .ranking-row.top3-row {
+            background: linear-gradient(135deg, rgba(205, 127, 50, 0.2) 0%, rgba(205, 127, 50, 0.05) 100%);
+            border: 2px solid rgba(205, 127, 50, 0.5);
+            box-shadow: 0 0 20px rgba(205, 127, 50, 0.2);
+        }
+
+        .rank-position {
+            font-family: 'Bebas Neue', sans-serif;
+            font-size: 2em;
+            text-align: center;
+            opacity: 0.8;
+        }
+
+        .rank-position.top1 { color: #f39c12; opacity: 1; }
+        .rank-position.top2 { color: #c0c0c0; opacity: 1; }
+        .rank-position.top3 { color: #cd7f32; opacity: 1; }
+
+        .player-info {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .player-avatar {
+            width: 60px;
+            height: 80px;
+            border-radius: 8px;
+            object-fit: cover;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+        }
+
+        .player-avatar.alliance { box-shadow: 0 0 15px rgba(52, 152, 219, 0.5); }
+        .player-avatar.rebellion { box-shadow: 0 0 15px rgba(231, 76, 60, 0.5); }
+        .player-avatar.trefonds { box-shadow: 0 0 15px rgba(46, 204, 113, 0.5); }
+
+        .player-name-container {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+
+        .player-name {
+            font-family: 'Bebas Neue', sans-serif;
+            font-size: 1.5em;
+            letter-spacing: 1px;
+        }
+
+        .player-faction {
+            font-size: 0.75em;
+            padding: 3px 10px;
+            border-radius: 15px;
+            font-weight: 600;
+            width: fit-content;
+        }
+
+        .player-faction.alliance { background: rgba(52, 152, 219, 0.3); color: #3498db; }
+        .player-faction.rebellion { background: rgba(231, 76, 60, 0.3); color: #e74c3c; }
+        .player-faction.trefonds { background: rgba(46, 204, 113, 0.3); color: #2ecc71; }
+
+        .ranking-stats {
+            display: flex;
+            gap: 30px;
+            align-items: flex-start;
+        }
+
+        .ranking-stat {
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+            min-width: 80px;
+            align-items: center;
+        }
+
+        .ranking-stat-label {
+            font-size: 0.7em;
+            color: rgba(255, 255, 255, 0.5);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .ranking-stat-value {
+            font-family: 'Bebas Neue', sans-serif;
+            font-size: 1.75em;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+        }
+
+        .ranking-stat-value.rank-display {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .ranking-stat .rank-icon-small {
+            width: 30px;
+            height: 30px;
+        }
+
+        .ranking-stat.mobile-stat {
+            display: none;
+        }
+
+        .ranking-stat .rank-icon-small {
+            width: 24px;
+            height: 24px;
+            object-fit: contain;
+        }
+
+        /* Couleurs des niveaux */
+        .level-gray { color: #888888; }
+        .level-green { color: #2ecc71; }
+        .level-blue { color: #3498db; }
+        .level-purple { color: #9b59b6; }
+        .level-gold { color: #f39c12; }
+        .level-max {
+            color: #f39c12;
+            text-shadow: 0 0 10px rgba(243, 156, 18, 0.8), 0 0 20px rgba(243, 156, 18, 0.6), 0 0 30px rgba(243, 156, 18, 0.4);
+            animation: gold-glow 2s ease-in-out infinite;
+        }
+
+        @keyframes gold-glow {
+            0%, 100% { 
+                text-shadow: 0 0 10px rgba(243, 156, 18, 0.8), 0 0 20px rgba(243, 156, 18, 0.6), 0 0 30px rgba(243, 156, 18, 0.4);
+            }
+            50% { 
+                text-shadow: 0 0 15px rgba(243, 156, 18, 1), 0 0 30px rgba(243, 156, 18, 0.8), 0 0 45px rgba(243, 156, 18, 0.6);
+            }
+        }
+
+        /* Couleurs des rangs */
+        .rank-scarlet { color: #e74c3c; }
+        .rank-maitre { color: #9b59b6; }
+        .rank-or { color: #f39c12; }
+        .rank-argent { color: #7fb3d5; }
+        .rank-bronze { color: #cd7f32; }
+        .rank-fer { color: #888888; }
+        .rank-nonclasse { color: #666666; }
+
+        /* Page Lore */
+        .lore-container {
+            width: 100%;
+            max-width: 100%;
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .lore-video-container {
+            width: 100%;
+            max-width: 900px;
+            margin: 0 auto 40px auto;
+            aspect-ratio: 16 / 9;
+        }
+
+        .lore-video-container iframe {
+            width: 100%;
+            height: 100%;
+            border: none;
+            border-radius: 15px;
+        }
+
+        /* Livre interactif */
+        .book-wrapper {
+            perspective: 2000px;
+            margin: 20px auto;
+            width: 100%;
+            max-width: 800px;
+        }
+
+        .book {
+            position: relative;
+            width: 100%;
+            aspect-ratio: 3 / 4;
+            transform-style: preserve-3d;
+        }
+
+        .book-page {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            border-radius: 0 10px 10px 0;
+            overflow: hidden;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+            transition: transform 0.6s ease, opacity 0.3s ease, z-index 0s 0.3s;
+            transform-origin: left center;
+            backface-visibility: hidden;
+            background: #1a1a2e;
+        }
+
+        .book-page img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+            background: #0a0a0a;
+        }
+
+        .book-page.active {
+            z-index: 10;
+            transform: rotateY(0deg);
+        }
+
+        .book-page.flipped {
+            transform: rotateY(-180deg);
+            z-index: 5;
+        }
+
+        .book-page.hidden {
+            opacity: 0;
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        /* Contrôles du livre */
+        .book-controls {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 30px;
+            margin-top: 30px;
+            flex-wrap: wrap;
+        }
+
+        .book-btn {
+            padding: 15px 35px;
+            font-size: 1.1em;
+            font-weight: bold;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.15), rgba(255, 255, 255, 0.05));
+            color: white;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.3);
+        }
+
+        .book-btn:hover:not(:disabled) {
+            transform: translateY(-3px);
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.2), rgba(255, 255, 255, 0.1));
+            box-shadow: 0 8px 30px rgba(255, 255, 255, 0.1);
+        }
+
+        .book-btn:disabled {
+            background: #333;
+            cursor: not-allowed;
+            box-shadow: none;
+            opacity: 0.5;
+        }
+
+        .page-indicator {
+            font-size: 1.2em;
+            color: #888;
+            min-width: 100px;
+            text-align: center;
+        }
+
+        .page-indicator span {
+            color: #ffffff;
+            font-weight: bold;
+        }
+
+        /* Zone cliquable sur le livre */
+        .book-click-zone {
+            position: absolute;
+            top: 0;
+            width: 50%;
+            height: 100%;
+            cursor: pointer;
+            z-index: 20;
+        }
+
+        .book-click-zone.left {
+            left: 0;
+        }
+
+        .book-click-zone.right {
+            right: 0;
+        }
+
+        .book-click-zone:hover::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        /* Instructions */
+        .book-instructions {
+            text-align: center;
+            color: #666;
+            font-size: 0.9em;
+            margin-top: 15px;
+        }
+
+        @media (max-width: 768px) {
+            .lore-container {
+                padding: 10px;
+            }
+
+            .lore-video-container {
+                margin-bottom: 25px;
+                border-radius: 10px;
+            }
+
+            .lore-video-container iframe {
+                border-radius: 10px;
+            }
+
+            .book-wrapper {
+                max-width: 100%;
+            }
+            
+            .book-controls {
+                gap: 10px;
+                margin-top: 20px;
+            }
+            
+            .book-btn {
+                padding: 10px 18px;
+                font-size: 0.85em;
+            }
+
+            .page-indicator {
+                font-size: 1em;
+                min-width: 70px;
+            }
+
+            .book-instructions {
+                font-size: 0.75em;
+                margin-top: 10px;
+            }
+        }
+
+        /* Page Le Jeu */
+        .game-container {
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+
+        .game-section {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 15px;
+            padding: 30px;
+            margin-bottom: 25px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .game-section h2 {
+            font-family: 'Bebas Neue', sans-serif;
+            font-size: 1.8em;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            letter-spacing: 1px;
+        }
+
+        .game-section p {
+            color: #ccc;
+            line-height: 1.7;
+            margin-bottom: 15px;
+        }
+
+        .game-section p strong {
+            color: #fff;
+        }
+
+        /* Features cards */
+        .game-features {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .feature-card {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            padding: 20px;
+            text-align: center;
+            transition: all 0.3s ease;
+        }
+
+        .feature-card:hover {
+            transform: translateY(-5px);
+            border-color: rgba(255, 255, 255, 0.2);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+        }
+
+        .feature-icon {
+            width: 50px;
+            height: 50px;
+            object-fit: contain;
+            display: block;
+            margin: 0 auto 10px auto;
+        }
+
+        .feature-card h4 {
+            font-family: 'Bebas Neue', sans-serif;
+            font-size: 1.2em;
+            margin-bottom: 8px;
+            letter-spacing: 1px;
+        }
+
+        .feature-card p {
+            font-size: 0.85em;
+            color: #888;
+            margin: 0;
+        }
+
+        /* Stats explanation */
+        .stats-explanation {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 12px;
+            margin-top: 20px;
+        }
+
+        .stat-explain-card {
+            background: rgba(255, 255, 255, 0.03);
+            border-radius: 12px;
+            padding: 18px 15px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            transition: all 0.3s ease;
+            text-align: center;
+        }
+
+        .stat-explain-card:hover {
+            transform: translateY(-3px);
+        }
+
+        .stat-explain-card.attack { border-color: rgba(231, 76, 60, 0.5); }
+        .stat-explain-card.defense { border-color: rgba(52, 152, 219, 0.5); }
+        .stat-explain-card.strategy { border-color: rgba(155, 89, 182, 0.5); }
+        .stat-explain-card.speed { border-color: rgba(243, 156, 18, 0.5); }
+        .stat-explain-card.hp { border-color: rgba(231, 76, 60, 0.5); }
+
+        .stat-explain-header {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 5px;
+            margin-bottom: 12px;
+        }
+
+        .stat-emoji {
+            font-size: 2.5em;
+        }
+
+        .stat-explain-card h4 {
+            font-family: 'Bebas Neue', sans-serif;
+            font-size: 1.4em;
+            margin: 0;
+            letter-spacing: 1px;
+        }
+
+        .stat-explain-card.attack h4 { color: #e74c3c; }
+        .stat-explain-card.defense h4 { color: #3498db; }
+        .stat-explain-card.strategy h4 { color: #9b59b6; }
+        .stat-explain-card.speed h4 { color: #f39c12; }
+        .stat-explain-card.hp h4 { color: #e74c3c; }
+
+        .stat-explain-card p {
+            font-size: 0.8em;
+            color: #aaa;
+            margin: 0;
+            line-height: 1.5;
+            text-align: center;
+        }
+
+        /* Improve list */
+        .improve-list {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            margin-top: 15px;
+        }
+
+        .improve-item {
+            display: flex;
+            align-items: flex-start;
+            gap: 15px;
+            background: rgba(255, 255, 255, 0.03);
+            border-radius: 10px;
+            padding: 15px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .improve-icon {
+            font-size: 1.8em;
+            min-width: 40px;
+            text-align: center;
+        }
+
+        .improve-icon-img {
+            width: 40px;
+            height: 40px;
+            object-fit: contain;
+            min-width: 40px;
+        }
+
+        .improve-content h4 {
+            font-family: 'Bebas Neue', sans-serif;
+            font-size: 1.1em;
+            margin-bottom: 5px;
+            letter-spacing: 1px;
+        }
+
+        .improve-content p {
+            font-size: 0.9em;
+            color: #aaa;
+            margin: 0;
+        }
+
+        /* Ranks display */
+        .ranks-display {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            flex-wrap: wrap;
+            margin: 25px 0;
+        }
+
+        .rank-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+            padding: 15px;
+            background: rgba(255, 255, 255, 0.03);
+            border-radius: 12px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            min-width: 80px;
+            transition: all 0.3s ease;
+        }
+
+        .rank-item:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+        }
+
+        .rank-img {
+            width: 50px;
+            height: 50px;
+            object-fit: contain;
+        }
+
+        .rank-item span {
+            font-family: 'Bebas Neue', sans-serif;
+            font-size: 0.95em;
+            letter-spacing: 1px;
+        }
+
+        .rank-item.scarlet { border-color: rgba(220, 20, 60, 0.5); }
+        .rank-item.scarlet span { color: #dc143c; }
+        .rank-item.maitre { border-color: rgba(148, 0, 211, 0.5); }
+        .rank-item.maitre span { color: #9400d3; }
+        .rank-item.or { border-color: rgba(255, 215, 0, 0.5); }
+        .rank-item.or span { color: #ffd700; }
+        .rank-item.argent { border-color: rgba(192, 192, 192, 0.5); }
+        .rank-item.argent span { color: #c0c0c0; }
+        .rank-item.bronze { border-color: rgba(205, 127, 50, 0.5); }
+        .rank-item.bronze span { color: #cd7f32; }
+        .rank-item.fer { border-color: rgba(128, 128, 128, 0.5); }
+        .rank-item.fer span { color: #808080; }
+
+        .rank-info {
+            text-align: center;
+            font-style: italic;
+            color: #888;
+        }
+
+        /* Weapons showcase */
+        .weapons-showcase {
+            margin-top: 20px;
+        }
+
+        .weapons-rarity-section {
+            margin-bottom: 25px;
+        }
+
+        .weapons-rarity-title {
+            font-family: 'Bebas Neue', sans-serif;
+            font-size: 1.3em;
+            margin-bottom: 12px;
+            padding-bottom: 8px;
+            border-bottom: 2px solid rgba(255, 255, 255, 0.1);
+            letter-spacing: 1px;
+        }
+
+        .weapons-rarity-title.commune { color: #888888; border-color: rgba(136, 136, 136, 0.3); }
+        .weapons-rarity-title.rare { color: #3498db; border-color: rgba(52, 152, 219, 0.3); }
+        .weapons-rarity-title.epique { color: #9b59b6; border-color: rgba(155, 89, 182, 0.3); }
+        .weapons-rarity-title.legendaire { color: #f39c12; border-color: rgba(243, 156, 18, 0.3); }
+        .weapons-rarity-title.master { color: #ff1493; border-color: rgba(255, 20, 147, 0.3); }
+
+        .weapons-rarity-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+            gap: 12px;
+        }
+
+        .weapon-showcase-card {
+            background: rgba(255, 255, 255, 0.03);
+            border-radius: 10px;
+            padding: 12px;
+            text-align: center;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .weapon-showcase-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
+        }
+
+        .weapon-showcase-card.commune { 
+            border-color: rgba(136, 136, 136, 0.4); 
+            background: rgba(136, 136, 136, 0.08);
+        }
+        .weapon-showcase-card.rare { 
+            border-color: rgba(52, 152, 219, 0.4); 
+            background: rgba(52, 152, 219, 0.1);
+        }
+        .weapon-showcase-card.epique { 
+            border-color: rgba(155, 89, 182, 0.4); 
+            background: rgba(155, 89, 182, 0.1);
+        }
+        .weapon-showcase-card.legendaire { 
+            border-color: rgba(243, 156, 18, 0.4); 
+            background: rgba(243, 156, 18, 0.1);
+        }
+        .weapon-showcase-card.master { 
+            border-color: rgba(255, 20, 147, 0.4); 
+            background: rgba(255, 20, 147, 0.1);
+            animation: rainbow-border 3s infinite;
+        }
+
+        @keyframes rainbow-border {
+            0%, 100% { border-color: rgba(255, 20, 147, 0.6); }
+            33% { border-color: rgba(0, 255, 255, 0.6); }
+            66% { border-color: rgba(255, 255, 0, 0.6); }
+        }
+
+        .weapon-showcase-img {
+            width: 80px;
+            height: 80px;
+            object-fit: contain;
+            margin-bottom: 8px;
+        }
+
+        .weapon-showcase-name {
+            font-size: 0.85em;
+            color: #fff;
+            line-height: 1.3;
+        }
+
+        .weapon-event-badge {
+            position: absolute;
+            top: 5px;
+            right: 5px;
+            background: linear-gradient(135deg, #c41e3a, #228b22);
+            color: white;
+            font-size: 0.6em;
+            padding: 2px 6px;
+            border-radius: 8px;
+            font-weight: bold;
+        }
+
+        /* Titles list */
+        .titles-list {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+            margin-top: 15px;
+        }
+
+        .title-requirement {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            background: rgba(255, 255, 255, 0.03);
+            border-radius: 8px;
+            padding: 12px 15px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .title-icon {
+            font-size: 1.3em;
+        }
+
+        .title-req-icon {
+            width: 28px;
+            height: 28px;
+            object-fit: contain;
+        }
+
+        .title-requirement span:last-child {
+            color: #ccc;
+            font-size: 0.95em;
+        }
+
+        /* XP methods */
+        .xp-methods {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            margin-top: 15px;
+            justify-content: center;
+        }
+
+        .xp-method {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            background: rgba(255, 255, 255, 0.03);
+            border-radius: 25px;
+            padding: 12px 20px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .xp-icon {
+            font-size: 1.3em;
+        }
+
+        .xp-method-icon {
+            width: 24px;
+            height: 24px;
+            object-fit: contain;
+        }
+
+        .xp-method span:last-child {
+            color: #ccc;
+        }
+
+        /* Lore section in game page */
+        .lore-section {
+            margin-top: 30px;
+        }
+
+        .book-title {
+            font-family: 'Bebas Neue', sans-serif;
+            font-size: 1.4em;
+            text-align: center;
+            margin: 30px 0 20px;
+            letter-spacing: 1px;
+            color: #888;
+        }
+
+        /* Mobile styles for game page */
+        @media (max-width: 768px) {
+            .game-container {
+                padding: 0 10px;
+            }
+
+            .game-section {
+                padding: 20px 15px;
+                margin-bottom: 15px;
+            }
+
+            .game-section h2 {
+                font-size: 1.4em;
+                gap: 8px;
+            }
+
+            .game-features {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 10px;
+            }
+
+            .feature-card {
+                padding: 15px 10px;
+            }
+
+            .feature-icon {
+                width: 40px;
+                height: 40px;
+            }
+
+            .feature-card h4 {
+                font-size: 1em;
+            }
+
+            .feature-card p {
+                font-size: 0.75em;
+            }
+
+            .stats-explanation {
+                grid-template-columns: 1fr;
+                gap: 10px;
+            }
+
+            .stat-explain-card {
+                display: flex;
+                flex-direction: row;
+                align-items: flex-start;
+                gap: 12px;
+                text-align: left;
+            }
+
+            .stat-explain-card p {
+                text-align: left;
+            }
+
+            .stat-explain-header {
+                flex-direction: column;
+                align-items: center;
+                min-width: 70px;
+                margin-bottom: 0;
+            }
+
+            .stat-explain-header .stat-emoji {
+                font-size: 2em;
+            }
+
+            .stat-explain-header h4 {
+                font-size: 1.1em;
+                text-align: center;
+            }
+
+            .improve-item {
+                padding: 12px;
+            }
+
+            .improve-icon {
+                font-size: 1.5em;
+                min-width: 35px;
+            }
+
+            .improve-icon-img {
+                width: 32px;
+                height: 32px;
+                min-width: 32px;
+            }
+
+            .improve-content h4 {
+                font-size: 1em;
+            }
+
+            .improve-content p {
+                font-size: 0.85em;
+            }
+
+            .ranks-display {
+                gap: 10px;
+            }
+
+            .rank-item {
+                padding: 10px;
+                min-width: 70px;
+            }
+
+            .rank-img {
+                width: 40px;
+                height: 40px;
+            }
+
+            .rank-item span {
+                font-size: 0.8em;
+            }
+
+            .weapons-rarity-grid {
+                grid-template-columns: repeat(3, 1fr);
+                gap: 8px;
+            }
+
+            .weapon-showcase-card {
+                padding: 8px;
+            }
+
+            .weapon-showcase-img {
+                width: 60px;
+                height: 60px;
+            }
+
+            .weapon-showcase-name {
+                font-size: 0.7em;
+            }
+
+            .weapon-event-badge {
+                font-size: 0.5em;
+                padding: 1px 4px;
+            }
+
+            .titles-list {
+                grid-template-columns: 1fr;
+            }
+
+            .title-requirement {
+                padding: 10px 12px;
+            }
+
+            .title-req-icon {
+                width: 22px;
+                height: 22px;
+            }
+
+            .xp-methods {
+                flex-direction: column;
+            }
+
+            .xp-method {
+                justify-content: center;
+            }
+
+            .xp-method-icon {
+                width: 20px;
+                height: 20px;
+            }
+        }
+
+        /* Page Projet */
+        .project-container {
+            display: flex;
+            flex-direction: column;
+            gap: 25px;
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        .project-section {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 15px;
+            padding: 30px 40px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .project-section h2 {
+            color: #ffffff;
+            font-size: 2em;
+            margin-bottom: 20px;
+            text-align: center;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+        }
+
+        .title-icon {
+            width: 32px;
+            height: 32px;
+            object-fit: contain;
+        }
+
+        .point-icon {
+            width: 18px;
+            height: 18px;
+            object-fit: contain;
+            vertical-align: middle;
+        }
+
+        .project-section p {
+            color: #ccc;
+            line-height: 1.8;
+            margin-bottom: 15px;
+            text-align: center;
+            font-size: 1.1em;
+            max-width: 700px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        /* Centrage du bouton boutique */
+        .project-section .shop-btn {
+            display: flex;
+            margin-left: auto;
+            margin-right: auto;
+            width: fit-content;
+        }
+
+        /* Liens des créateurs */
+        .creator-link {
+            display: inline;
+            padding: 2px 10px;
+            border-radius: 20px;
+            text-decoration: none;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .creator-link.clyde {
+            background: rgba(145, 70, 255, 0.3);
+            color: #9146ff;
+            border: 1px solid rgba(145, 70, 255, 0.5);
+        }
+
+        .creator-link.clyde:hover {
+            background: rgba(145, 70, 255, 0.5);
+            box-shadow: 0 0 15px rgba(145, 70, 255, 0.4);
+        }
+
+        .creator-link.swalen {
+            background: rgba(145, 70, 255, 0.3);
+            color: #9146ff;
+            border: 1px solid rgba(145, 70, 255, 0.5);
+        }
+
+        .creator-link.swalen:hover {
+            background: rgba(145, 70, 255, 0.5);
+            box-shadow: 0 0 15px rgba(145, 70, 255, 0.4);
+        }
+
+        /* Barre de liens sociaux style menu */
+        .social-links-bar {
+            display: flex;
+            justify-content: center;
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 50px;
+            padding: 8px;
+            margin-top: 20px;
+            gap: 5px;
+            flex-wrap: wrap;
+        }
+
+        .social-btn {
+            position: relative;
+            padding: 12px 20px;
+            background: transparent;
+            border: none;
+            border-radius: 40px;
+            color: rgba(255, 255, 255, 0.7);
+            font-family: 'Bebas Neue', sans-serif;
+            font-size: 1.1em;
+            letter-spacing: 1px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            overflow: hidden;
+            text-decoration: none;
+        }
+
+        .social-btn-icon {
+            width: 22px;
+            height: 22px;
+            object-fit: contain;
+            transition: filter 0.3s ease;
+        }
+
+        /* Effet holographique */
+        .social-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(
+                90deg,
+                transparent,
+                rgba(255, 255, 255, 0.1),
+                rgba(255, 100, 200, 0.15),
+                rgba(100, 200, 255, 0.15),
+                rgba(255, 255, 100, 0.1),
+                transparent
+            );
+            transition: left 0.5s ease;
+            border-radius: 40px;
+        }
+
+        .social-btn:hover::before {
+            left: 100%;
+        }
+
+        /* Couleurs par réseau */
+        .social-btn.twitch:hover {
+            background: rgba(145, 70, 255, 0.3);
+            color: #9146ff;
+        }
+
+        .social-btn.youtube:hover {
+            background: rgba(255, 0, 0, 0.3);
+            color: #ff0000;
+        }
+
+        .social-btn.tiktok:hover {
+            background: rgba(0, 242, 234, 0.3);
+            color: #00f2ea;
+        }
+
+        .social-btn.instagram:hover {
+            background: rgba(225, 48, 108, 0.3);
+            color: #e1306c;
+        }
+
+        .social-btn.discord:hover {
+            background: rgba(114, 137, 218, 0.3);
+            color: #7289da;
+        }
+
+        /* Social blocks - nouveaux blocs rectangulaires */
+        .social-blocks {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-top: 20px;
+            flex-wrap: wrap;
+        }
+
+        .social-block {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 12px;
+            padding: 20px 25px;
+            background: rgba(255, 255, 255, 0.03);
+            border: 2px solid rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            text-decoration: none;
+            color: white;
+            transition: all 0.3s ease;
+            min-width: 100px;
+        }
+
+        .social-block:hover {
+            transform: translateY(-5px);
+        }
+
+        .social-block-icon {
+            width: 45px;
+            height: 45px;
+            object-fit: contain;
+            transition: transform 0.3s ease;
+        }
+
+        .social-block:hover .social-block-icon {
+            transform: scale(1.1);
+        }
+
+        .social-block-name {
+            font-family: 'Bebas Neue', sans-serif;
+            font-size: 1.1em;
+            letter-spacing: 1px;
+        }
+
+        .social-block.twitch:hover {
+            border-color: #9146ff;
+            box-shadow: 0 10px 30px rgba(145, 70, 255, 0.4);
+        }
+        .social-block.twitch .social-block-name { color: #9146ff; }
+
+        .social-block.youtube:hover {
+            border-color: #ff0000;
+            box-shadow: 0 10px 30px rgba(255, 0, 0, 0.4);
+        }
+        .social-block.youtube .social-block-name { color: #ff0000; }
+
+        .social-block.tiktok:hover {
+            border-color: #00f2ea;
+            box-shadow: 0 10px 30px rgba(0, 242, 234, 0.4);
+        }
+        .social-block.tiktok .social-block-name { color: #00f2ea; }
+
+        .social-block.instagram:hover {
+            border-color: #e1306c;
+            box-shadow: 0 10px 30px rgba(225, 48, 108, 0.4);
+        }
+        .social-block.instagram .social-block-name { color: #e1306c; }
+
+        .social-block.discord:hover {
+            border-color: #7289da;
+            box-shadow: 0 10px 30px rgba(114, 137, 218, 0.4);
+        }
+        .social-block.discord .social-block-name { color: #7289da; }
+
+        /* Bouton boutique */
+        .shop-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            padding: 15px 35px;
+            margin-top: 20px;
+            background: linear-gradient(135deg, rgba(243, 156, 18, 0.3), rgba(243, 156, 18, 0.1));
+            border: 2px solid rgba(243, 156, 18, 0.5);
+            border-radius: 30px;
+            color: #ffffff;
+            font-family: 'Bebas Neue', sans-serif;
+            font-size: 1.3em;
+            letter-spacing: 1px;
+            text-decoration: none;
+            transition: all 0.3s ease;
+        }
+
+        .shop-btn:hover {
+            transform: translateY(-3px);
+            background: linear-gradient(135deg, rgba(243, 156, 18, 0.5), rgba(243, 156, 18, 0.2));
+            box-shadow: 0 10px 30px rgba(243, 156, 18, 0.3);
+            color: #ffffff;
+        }
+
+        /* Anciens styles social-links (gardés pour compatibilité) */
+        .social-links {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-top: 30px;
+            flex-wrap: wrap;
+        }
+
+        .social-card {
+            background: rgba(255, 255, 255, 0.05);
+            border: 2px solid rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            padding: 15px;
+            text-align: center;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            color: white;
+            width: 140px;
+            flex-shrink: 0;
+        }
+
+        .social-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+        }
+
+        .social-card.twitch:hover {
+            border-color: #9146ff;
+            box-shadow: 0 10px 30px rgba(145, 70, 255, 0.5);
+        }
+
+        .social-card.youtube:hover {
+            border-color: #ff0000;
+            box-shadow: 0 10px 30px rgba(255, 0, 0, 0.5);
+        }
+
+        .social-card.tiktok:hover {
+            border-color: #00f2ea;
+            box-shadow: 0 10px 30px rgba(0, 242, 234, 0.5);
+        }
+
+        .social-card.instagram:hover {
+            border-color: #e1306c;
+            box-shadow: 0 10px 30px rgba(225, 48, 108, 0.5);
+        }
+
+        .social-card.discord:hover {
+            border-color: #5865f2;
+            box-shadow: 0 10px 30px rgba(88, 101, 242, 0.5);
+        }
+
+        .social-icon {
+            width: 40px;
+            height: 40px;
+            margin: 0 auto 10px;
+            object-fit: contain;
+        }
+
+        .social-name {
+            font-size: 1em;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+
+        .social-description {
+            color: #888;
+            font-size: 0.7em;
+            line-height: 1.3;
+        }
+
+        /* Section Installation App */
+        .install-section {
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.05) 0%, rgba(255, 255, 255, 0.02) 100%);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            border-radius: 15px;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .install-section h2 {
+            color: #ffffff;
+            font-size: 1.8em;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+        }
+
+        .install-section > p {
+            color: #ccc;
+            margin-bottom: 20px;
+            font-size: 1.1em;
+        }
+
+        .install-btn {
+            display: none;
+            padding: 15px 40px;
+            font-size: 1.2em;
+            font-weight: bold;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.2), rgba(255, 255, 255, 0.1));
+            color: white;
+            margin: 20px auto;
+            transition: all 0.3s ease;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.3);
+        }
+
+        .install-btn:hover {
+            transform: translateY(-3px);
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.25), rgba(255, 255, 255, 0.15));
+            box-shadow: 0 8px 30px rgba(255, 255, 255, 0.1);
+        }
+
+        .install-btn.show {
+            display: inline-block;
+        }
+
+        .install-instructions {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 20px;
+            margin-top: 25px;
+            text-align: left;
+        }
+
+        .install-card {
+            background: rgba(255, 255, 255, 0.05);
+            border: 2px solid rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            padding: 20px;
+        }
+
+        .install-card h3 {
+            color: #f39c12;
+            font-size: 1.2em;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .install-card ol {
+            color: #ccc;
+            padding-left: 20px;
+            line-height: 1.8;
+        }
+
+        .install-card li {
+            margin-bottom: 8px;
+        }
+
+        .install-note {
+            color: #888;
+            font-size: 0.9em;
+            margin-top: 20px;
+            font-style: italic;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            body {
+                padding: 10px;
+            }
+
+            .container {
+                padding: 0;
+            }
+
+            header {
+                padding: 10px 10px 0;
+                margin-bottom: 20px;
+            }
+
+            .logo {
+                max-width: 280px;
+                margin-bottom: 5px;
+            }
+
+            /* Menu mobile - icônes avec texte en dessous */
+            .nav-menu {
+                display: flex;
+                justify-content: center;
+                gap: 0;
+                margin-bottom: 0;
+                padding: 8px 10px;
+                border-radius: 20px;
+                width: 100%;
+                max-width: 100%;
+            }
+
+            .nav-btn {
+                padding: 10px 8px;
+                font-size: 0.65em;
+                border-radius: 15px;
+                flex: 1;
+                flex-direction: column;
+                align-items: center;
+                justify-content: center;
+                gap: 5px;
+                text-align: center;
+            }
+
+            .nav-btn .nav-icon {
+                width: 24px;
+                height: 24px;
+            }
+
+            .nav-btn .menu-text {
+                font-size: 1em;
+                line-height: 1.2;
+            }
+
+            .nav-btn.active::after {
+                bottom: 3px;
+                width: 15px;
+                height: 2px;
+            }
+
+            /* Grille de cartes - 3 par ligne sur mobile */
+            .character-grid {
+                grid-template-columns: repeat(3, 1fr);
+                gap: 10px;
+            }
+
+            .character-card {
+                border-radius: 10px;
+            }
+
+            .character-card-front,
+            .character-card-back {
+                border-radius: 10px;
+            }
+
+            .character-card-back img {
+                border-radius: 10px;
+            }
+
+            /* Désactiver les effets hover et 3D sur mobile */
+            .character-card:hover .character-card-front {
+                box-shadow: 0 5px 15px rgba(0, 0, 0, 0.4) !important;
+            }
+
+            .character-card .character-card-inner.tilt {
+                transform: rotateY(0deg) rotateX(0deg) !important;
+            }
+
+            .character-card-content {
+                padding: 8px;
+            }
+
+            .character-card h3 {
+                font-size: 0.7em;
+                margin-bottom: 2px;
+            }
+
+            .character-card-info {
+                font-size: 0.6em;
+            }
+
+            .faction-badge {
+                padding: 2px 6px;
+                font-size: 0.55em;
+                margin-bottom: 4px;
+            }
+
+            /* Barre de recherche */
+            .search-container {
+                margin-bottom: 20px;
+            }
+
+            #searchInput {
+                padding: 12px 15px 12px 45px;
+                font-size: 1em;
+            }
+
+            .search-icon {
+                left: 12px;
+                width: 18px;
+                height: 18px;
+            }
+
+            /* Recherche classement mobile */
+            .ranking-search-container {
+                margin-bottom: 15px;
+            }
+
+            .ranking-search {
+                padding: 10px 15px 10px 45px;
+            }
+
+            .ranking-search input {
+                font-size: 0.9em;
+            }
+
+            /* Filtres mobile */
+            .filters-container {
+                gap: 15px;
+                margin-bottom: 15px;
+                flex-direction: column;
+            }
+
+            .filter-section {
+                flex-direction: column;
+                align-items: center;
+                gap: 8px;
+                width: 100%;
+            }
+
+            .filter-section-title {
+                font-size: 1em;
+                text-align: center;
+            }
+
+            .filter-buttons {
+                padding: 4px;
+                gap: 3px;
+                flex-wrap: wrap;
+                justify-content: center;
+            }
+
+            .filter-btn {
+                padding: 8px 12px;
+                font-size: 0.9em;
+                gap: 5px;
+            }
+
+            .filter-icon {
+                width: 16px;
+                height: 16px;
+            }
+
+            /* Classement mobile */
+            .ranking-table {
+                gap: 8px;
+            }
+
+            .ranking-row {
+                grid-template-columns: 35px 45px 1fr auto;
+                padding: 8px;
+                gap: 8px;
+                border-radius: 12px;
+            }
+
+            .ranking-row.top1-row,
+            .ranking-row.top2-row,
+            .ranking-row.top3-row {
+                padding: 10px 8px;
+            }
+
+            .rank-position {
+                font-size: 1.1em;
+            }
+
+            .player-avatar {
+                width: 45px;
+                height: 60px;
+                border-radius: 6px;
+            }
+
+            .player-info {
+                gap: 3px;
+                min-width: 0;
+                overflow: hidden;
+            }
+
+            .player-name {
+                font-size: 1em;
+                white-space: nowrap;
+                overflow: hidden;
+                text-overflow: ellipsis;
+            }
+
+            .player-name.long-name {
+                font-size: 0.85em;
+            }
+
+            .player-faction {
+                font-size: 0.6em;
+                padding: 2px 5px;
+            }
+
+            .ranking-stats {
+                gap: 6px;
+                flex-shrink: 0;
+            }
+
+            .ranking-stat.hide-mobile {
+                display: none !important;
+            }
+
+            .ranking-stat.mobile-stat {
+                display: flex !important;
+                flex-direction: column;
+                align-items: center;
+                gap: 3px;
+                font-family: 'Bebas Neue', sans-serif;
+                font-size: 1.15em;
+                letter-spacing: 0.5px;
+                min-width: 48px;
+            }
+
+            .mobile-stat-label {
+                font-size: 0.45em;
+                color: rgba(255, 255, 255, 0.7);
+                text-transform: uppercase;
+                letter-spacing: 0.5px;
+            }
+
+            .mobile-stat.mobile-rank .mobile-stat-label {
+                font-size: 0.5em;
+            }
+
+            .ranking-stat .rank-icon-small {
+                width: 22px;
+                height: 22px;
+            }
+
+            /* Croix de fermeture mobile */
+            .close-detail-btn {
+                top: 10px;
+                right: 10px;
+                width: 30px;
+                height: 30px;
+                font-size: 1.3em;
+            }
+
+            /* Lightbox mobile */
+            .lightbox-close {
+                top: 10px;
+                right: 15px;
+                font-size: 2em;
+            }
+
+            .lightbox-card-container img {
+                max-width: 90vw;
+                max-height: 75vh;
+            }
+
+            /* Détail personnage - carte + infos côte à côte */
+            .detail-header {
+                flex-direction: row;
+                flex-wrap: nowrap;
+                align-items: flex-start;
+                gap: 15px;
+            }
+
+            .card-image {
+                width: 120px;
+                height: 160px;
+                min-width: 120px;
+                border-radius: 8px;
+            }
+
+            .detail-info {
+                min-width: unset;
+                flex: 1;
+            }
+
+            .detail-info h2 {
+                font-size: 1.3em;
+                margin-bottom: 8px;
+            }
+
+            .detail-info .faction-badge {
+                font-size: 0.7em;
+                padding: 3px 8px;
+                margin-bottom: 5px;
+            }
+
+            .rank-badge {
+                padding: 6px 10px;
+                margin: 8px 0;
+                gap: 6px;
+            }
+
+            .rank-icon {
+                width: 24px;
+                height: 24px;
+            }
+
+            .rank-badge span {
+                font-size: 0.9em !important;
+            }
+
+            .detail-info p {
+                font-size: 0.85em !important;
+                margin: 4px 0 !important;
+            }
+
+            .character-detail {
+                padding: 12px;
+                margin-bottom: 15px;
+            }
+
+            .character-detail h3 {
+                font-size: 1.1em;
+                margin-bottom: 10px;
+            }
+
+            .stats-grid {
+                grid-template-columns: repeat(5, 1fr);
+                gap: 6px;
+            }
+
+            .stat-box {
+                padding: 8px 4px;
+            }
+
+            .stat-label {
+                font-size: 0.65em;
+            }
+
+            .stat-value {
+                font-size: 1.1em;
+            }
+
+            /* Description */
+            .description-box {
+                padding: 12px;
+                margin-bottom: 15px;
+            }
+
+            .description-box h3 {
+                font-size: 1.1em;
+                margin-bottom: 8px;
+            }
+
+            .description-box p {
+                font-size: 0.85em !important;
+                line-height: 1.4 !important;
+            }
+
+            /* Arme équipée - plus compact */
+            .equipped-weapon-section {
+                margin-bottom: 15px;
+            }
+
+            .equipped-weapon-title {
+                font-size: 1.1em;
+                margin-bottom: 10px;
+            }
+
+            .equipped-weapon-card {
+                padding: 10px;
+                gap: 10px;
+            }
+
+            .equipped-weapon-card .weapon-event-badge {
+                position: absolute;
+                top: 3px;
+                right: 3px;
+                font-size: 0.5em;
+                padding: 2px 5px;
+                border-radius: 6px;
+            }
+
+            .equipped-weapon-image {
+                width: 70px;
+                height: 70px;
+                padding: 5px;
+            }
+
+            .equipped-weapon-name {
+                font-size: 1em;
+                margin-bottom: 5px;
+            }
+
+            .equipped-weapon-rarity {
+                font-size: 0.7em;
+                padding: 3px 10px;
+            }
+
+            /* Armes débloquées - 4 par ligne */
+            .weapons-section h3 {
+                font-size: 1.1em !important;
+                margin: 15px 0 10px 0 !important;
+            }
+
+            .weapons-grid {
+                grid-template-columns: repeat(4, 1fr);
+                gap: 8px;
+            }
+
+            .weapon-card {
+                padding: 6px;
+                border-radius: 8px;
+            }
+
+            .weapon-card .weapon-event-badge {
+                font-size: 0.5em;
+                padding: 2px 4px;
+                top: 3px;
+                right: 3px;
+                border-radius: 5px;
+            }
+
+            .weapon-image {
+                height: 50px;
+                margin-bottom: 5px;
+                padding: 3px;
+            }
+
+            .weapon-name {
+                font-size: 0.6em;
+                margin-bottom: 3px;
+            }
+
+            .weapon-rarity {
+                font-size: 0.5em;
+                padding: 2px 6px;
+            }
+
+            /* Bouton fermer */
+            .close-btn {
+                padding: 12px 30px;
+                font-size: 0.95em;
+                margin-top: 15px;
+            }
+
+            /* Page Projet */
+            .social-links {
+                gap: 8px;
+                justify-content: center;
+            }
+
+            .social-card {
+                width: calc(20% - 8px);
+                min-width: 60px;
+                max-width: 80px;
+                padding: 10px 5px;
+            }
+
+            .social-icon {
+                width: 28px;
+                height: 28px;
+            }
+
+            .social-name {
+                font-size: 0.65em;
+            }
+
+            .social-description {
+                display: none;
+            }
+
+            /* Page Projet Mobile */
+            .project-container {
+                gap: 15px;
+                padding: 0 10px;
+            }
+
+            .project-section {
+                padding: 20px 15px;
+                border-radius: 12px;
+            }
+
+            .project-section h2 {
+                font-size: 1.4em;
+                gap: 8px;
+            }
+
+            .title-icon {
+                width: 24px;
+                height: 24px;
+            }
+
+            .project-section p {
+                font-size: 0.95em;
+            }
+
+            /* Barre sociale mobile */
+            .social-links-bar {
+                padding: 6px;
+                gap: 4px;
+                border-radius: 30px;
+                margin-top: 15px;
+            }
+
+            .social-btn {
+                padding: 8px 12px;
+                font-size: 0.85em;
+                gap: 5px;
+            }
+
+            .social-btn-icon {
+                width: 18px;
+                height: 18px;
+            }
+
+            /* Social blocks mobile */
+            .social-blocks {
+                gap: 10px;
+            }
+
+            .social-block {
+                padding: 15px 18px;
+                min-width: 70px;
+            }
+
+            .social-block-icon {
+                width: 35px;
+                height: 35px;
+            }
+
+            .social-block-name {
+                font-size: 0.9em;
+            }
+
+            .shop-btn {
+                padding: 12px 25px;
+                font-size: 1.1em;
+            }
+
+            /* Section Installation Mobile */
+            .install-section {
+                padding: 15px;
+                overflow: hidden;
+                box-sizing: border-box;
+            }
+
+            .install-section h2 {
+                font-size: 1.3em;
+            }
+
+            .install-section > p {
+                font-size: 0.9em;
+                margin-bottom: 15px;
+            }
+
+            .install-btn {
+                padding: 12px 25px;
+                font-size: 1em;
+                width: auto;
+                max-width: 100%;
+            }
+
+            .install-instructions {
+                display: flex;
+                flex-direction: column;
+                gap: 12px;
+                margin-top: 20px;
+            }
+
+            .install-card {
+                padding: 12px;
+                width: 100%;
+                box-sizing: border-box;
+            }
+
+            .install-card h3 {
+                font-size: 1em;
+                margin-bottom: 10px;
+            }
+
+            .install-card ol {
+                font-size: 0.85em;
+                padding-left: 16px;
+                line-height: 1.5;
+            }
+
+            .install-card li {
+                margin-bottom: 5px;
+            }
+
+            .install-note {
+                font-size: 0.75em;
+                margin-top: 15px;
+                padding: 0 5px;
+            }
+        }
+
+        /* Très petits écrans */
+        @media (max-width: 400px) {
+            .nav-btn {
+                padding: 8px 3px;
+                font-size: 0.65em;
+            }
+
+            .character-card h3 {
+                font-size: 0.6em;
+            }
+
+            .faction-badge {
+                font-size: 0.5em;
+                padding: 2px 4px;
+            }
+
+            /* Détail personnage très petit écran */
+            .card-image {
+                width: 100px;
+                height: 133px;
+                min-width: 100px;
+            }
+
+            .detail-info h2 {
+                font-size: 1.1em;
+            }
+
+            .stats-grid {
+                grid-template-columns: repeat(5, 1fr);
+                gap: 4px;
+            }
+
+            .stat-label {
+                font-size: 0.55em;
+            }
+
+            .stat-value {
+                font-size: 0.95em;
+            }
+
+            .weapons-grid {
+                grid-template-columns: repeat(4, 1fr);
+                gap: 5px;
+            }
+
+            .weapon-image {
+                height: 40px;
+            }
+
+            .weapon-name {
+                font-size: 0.5em;
+            }
+
+            .weapon-rarity {
+                font-size: 0.45em;
+                padding: 1px 4px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div id="loadingScreen" class="loading">
+        <img src="./icons/ChargementORORA.gif" alt="Chargement...">
+    </div>
+
+    <div id="mainContent" style="display: none;">
+        <div class="container">
+            <header>
+                <img src="./logo.png" alt="Orora" class="logo">
+                
+                <nav class="nav-menu">
+                    <button class="nav-btn active" onclick="changePage('personnages')">
+                        <img src="./icons/personnages.png" alt="" class="nav-icon">
+                        <span class="menu-text">Cartes</span>
+                    </button>
+                    <button class="nav-btn" onclick="changePage('classement')">
+                        <img src="./icons/classement.png" alt="" class="nav-icon">
+                        <span class="menu-text">Classement</span>
+                    </button>
+                    <button class="nav-btn" onclick="changePage('lore')">
+                        <img src="./icons/lore.png" alt="" class="nav-icon">
+                        <span class="menu-text">Le Jeu</span>
+                    </button>
+                    <button class="nav-btn" onclick="changePage('projet')">
+                        <img src="./icons/informations.png" alt="" class="nav-icon">
+                        <span class="menu-text">Le Projet</span>
+                    </button>
+                </nav>
+            </header>
+
+            <!-- PAGE PERSONNAGES -->
+            <div id="page-personnages" class="page active">
+                <div class="search-container">
+                    <img src="./icons/search.png" alt="" class="search-icon">
+                    <input 
+                        type="text" 
+                        id="searchInput" 
+                        placeholder="Rechercher un personnage..."
+                    >
+                </div>
+
+                <div id="characterDetail" class="character-detail"></div>
+                
+                <!-- Lightbox pour afficher la carte en grand -->
+                <div id="lightbox" class="lightbox" onclick="handleLightboxClick(event)">
+                    <span class="lightbox-close" onclick="closeLightbox()">&times;</span>
+                    <div id="lightboxCardContainer" class="lightbox-card-container">
+                        <img id="lightboxImage" src="" alt="Carte en grand">
+                        <div class="holographic-overlay"></div>
+                        <div class="rainbow-shine"></div>
+                        <div class="light-reflection"></div>
+                    </div>
+                </div>
+                
+                <div id="characterGrid" class="character-grid"></div>
+                <div id="noResults" class="no-results" style="display: none;">
+                    Aucun personnage trouvé
+                </div>
+            </div>
+
+            <!-- PAGE CLASSEMENT -->
+            <div id="page-classement" class="page">
+                <div class="ranking-search-container">
+                    <div class="search-box ranking-search">
+                        <img src="./icons/search.png" alt="" class="search-icon">
+                        <input type="text" id="rankingSearchInput" placeholder="Rechercher un personnage...">
+                    </div>
+                </div>
+                <div class="filters-container">
+                    <div class="filter-section">
+                        <span class="filter-section-title">Factions</span>
+                        <div class="filter-buttons faction-filters">
+                            <button class="filter-btn faction-btn alliance active" data-faction="Alliance" onclick="toggleFaction('Alliance')">
+                                <img src="./icons/alliance.png" alt="" class="filter-icon">
+                                <span>Alliance</span>
+                            </button>
+                            <button class="filter-btn faction-btn rebellion active" data-faction="Rébellion" onclick="toggleFaction('Rébellion')">
+                                <img src="./icons/rebellion.png" alt="" class="filter-icon">
+                                <span>Rébellion</span>
+                            </button>
+                            <button class="filter-btn faction-btn trefonds active" data-faction="Tréfonds" onclick="toggleFaction('Tréfonds')">
+                                <img src="./icons/trefonds.png" alt="" class="filter-icon">
+                                <span>Tréfonds</span>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="filter-section">
+                        <span class="filter-section-title">Trier par</span>
+                        <div class="filter-buttons sort-filters">
+                            <button class="filter-btn sort-btn active" data-sort="power" onclick="setSort('power')">
+                                <img src="./icons/puissance.png" alt="" class="filter-icon">
+                                <span>Puissance</span>
+                            </button>
+                            <button class="filter-btn sort-btn" data-sort="level" onclick="setSort('level')">
+                                <img src="./icons/niveau.png" alt="" class="filter-icon">
+                                <span>Niveau</span>
+                            </button>
+                            <button class="filter-btn sort-btn" data-sort="rank" onclick="setSort('rank')">
+                                <img src="./icons/rang.png" alt="" class="filter-icon">
+                                <span>Rang</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="ranking-table" id="rankingTable">
+                    <!-- Le tableau sera généré par JavaScript -->
+                </div>
+            </div>
+
+            <!-- PAGE LORE -->
+            <div id="page-lore" class="page">
+                <div class="game-container">
+                    
+                    <!-- Section Introduction -->
+                    <div class="game-section">
+                        <h2><img src="./icons/informations.png" alt="" class="title-icon"> C'est quoi Orora ?</h2>
+                        <p>Orora est un <strong>TCG interactif</strong> où chaque carte représente un viewer sur Twitch. Vous pouvez créer votre propre carte en décrivant le personnage que vous souhaitez incarner !</p>
+                        <div class="game-features">
+                            <div class="feature-card">
+                                <img src="./icons/carte.png" alt="" class="feature-icon">
+                                <h4>Créez votre carte</h4>
+                                <p>Décrivez votre personnage et obtenez votre carte unique</p>
+                            </div>
+                            <div class="feature-card">
+                                <img src="./icons/dés.png" alt="" class="feature-icon">
+                                <h4>Lancez des dés</h4>
+                                <p>Augmentez vos statistiques avec des lancers de dés</p>
+                            </div>
+                            <div class="feature-card">
+                                <img src="./icons/coffre.png" alt="" class="feature-icon">
+                                <h4>Ouvrez des coffres</h4>
+                                <p>Gagnez des armes pour augmenter votre puissance</p>
+                            </div>
+                            <div class="feature-card">
+                                <img src="./icons/xp.png" alt="" class="feature-icon">
+                                <h4>Gagnez de l'XP</h4>
+                                <p>Jouez et discutez pour monter en niveau</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Section Stats -->
+                    <div class="game-section">
+                        <h2><img src="./icons/stats.png" alt="" class="title-icon"> Les Statistiques</h2>
+                        <p>Chaque carte possède 5 statistiques de base qui définissent sa puissance en combat :</p>
+                        <div class="stats-explanation">
+                            <div class="stat-explain-card attack">
+                                <div class="stat-explain-header">
+                                    <span class="stat-emoji">⚔️</span>
+                                    <h4>Attaque</h4>
+                                </div>
+                                <p>Vous permet d'attaquer à chaque coup entre 0 et votre attaque maximum.</p>
+                            </div>
+                            <div class="stat-explain-card defense">
+                                <div class="stat-explain-header">
+                                    <span class="stat-emoji">🛡️</span>
+                                    <h4>Défense</h4>
+                                </div>
+                                <p>Permet de contrer l'attaque adverse. Se calcule sur la différence entre votre défense et celle de votre adversaire, contre un % de l'attaque adverse.</p>
+                            </div>
+                            <div class="stat-explain-card strategy">
+                                <div class="stat-explain-header">
+                                    <span class="stat-emoji">🧠</span>
+                                    <h4>Stratégie</h4>
+                                </div>
+                                <p>Permet d'augmenter votre attaque. Se calcule sur la différence entre votre stratégie et celle de votre adversaire, ajoutant un % de dégâts à votre attaque.</p>
+                            </div>
+                            <div class="stat-explain-card speed">
+                                <div class="stat-explain-header">
+                                    <span class="stat-emoji">⚡</span>
+                                    <h4>Vitesse</h4>
+                                </div>
+                                <p>Permet d'attaquer en premier (celui qui a le plus de vitesse). Plus votre vitesse est grande, plus vous avez de chances d'esquiver !</p>
+                            </div>
+                            <div class="stat-explain-card hp">
+                                <div class="stat-explain-header">
+                                    <span class="stat-emoji">❤️</span>
+                                    <h4>PV</h4>
+                                </div>
+                                <p>Vos points de vie correspondent à 5 fois le total de votre stat de PV.</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Section Améliorer stats -->
+                    <div class="game-section">
+                        <h2><img src="./icons/niveau.png" alt="" class="title-icon"> Améliorer vos statistiques</h2>
+                        <p>Il existe plusieurs moyens d'améliorer les statistiques de votre carte :</p>
+                        <div class="improve-list">
+                            <div class="improve-item">
+                                <img src="./icons/dés.png" alt="" class="improve-icon-img">
+                                <div class="improve-content">
+                                    <h4>Lancer des dés</h4>
+                                    <p>Les dés sont dégressifs : plus vous êtes fort, plus le dé que vous lancez est petit.</p>
+                                </div>
+                            </div>
+                            <div class="improve-item">
+                                <img src="./icons/combat.png" alt="" class="improve-icon-img">
+                                <div class="improve-content">
+                                    <h4>Gagner des combats</h4>
+                                    <p>Vaincre d'autres viewers vous octroie entre +1 et +3 sur une de vos statistiques.</p>
+                                </div>
+                            </div>
+                            <div class="improve-item">
+                                <img src="./icons/coffre.png" alt="" class="improve-icon-img">
+                                <div class="improve-content">
+                                    <h4>Ouvrir des coffres</h4>
+                                    <p>Obtenez des armes augmentant votre puissance d'attaque.</p>
+                                </div>
+                            </div>
+                            <div class="improve-item">
+                                <img src="./icons/offrande.png" alt="" class="improve-icon-img">
+                                <div class="improve-content">
+                                    <h4>Faire des offrandes</h4>
+                                    <p>Peut vous permettre de tomber dans des situations vous permettant de gagner des statistiques.</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Section Combats & Rangs -->
+                    <div class="game-section">
+                        <h2><img src="./icons/rang.png" alt="" class="title-icon"> Combats & Rangs</h2>
+                        <p>Les combats sont au cœur de l'expérience Orora. Combattez d'autres joueurs d'une faction adverse pour gagner en puissance et gravir les rangs !</p>
+                        <div class="ranks-display">
+                            <div class="rank-item fer">
+                                <img src="./ranks/Fer.png" alt="Fer" class="rank-img">
+                                <span>Fer</span>
+                            </div>
+                            <div class="rank-item bronze">
+                                <img src="./ranks/Bronze.png" alt="Bronze" class="rank-img">
+                                <span>Bronze</span>
+                            </div>
+                            <div class="rank-item argent">
+                                <img src="./ranks/Argent.png" alt="Argent" class="rank-img">
+                                <span>Argent</span>
+                            </div>
+                            <div class="rank-item or">
+                                <img src="./ranks/Or.png" alt="Or" class="rank-img">
+                                <span>Or</span>
+                            </div>
+                            <div class="rank-item maitre">
+                                <img src="./ranks/Maitre.png" alt="Maître" class="rank-img">
+                                <span>Maître</span>
+                            </div>
+                            <div class="rank-item scarlet">
+                                <img src="./ranks/Scarlet.png" alt="Scarlet" class="rank-img">
+                                <span>Scarlet</span>
+                            </div>
+                        </div>
+                        <p class="rank-info">Un système de rang est en place, permettant de progresser dans les classements. Plus vous remportez de combats, plus vous avancez dans les différents paliers de rang.</p>
+                    </div>
+
+                    <!-- Section Armes -->
+                    <div class="game-section">
+                        <h2><img src="./icons/armes.png" alt="" class="title-icon"> Les Armes</h2>
+                        <p>Ouvrez des coffres pour obtenir des armes et augmenter votre puissance d'attaque !</p>
+                        <div class="weapons-showcase" id="weaponsShowcase">
+                            <!-- Les armes seront générées par JavaScript -->
+                        </div>
+                    </div>
+
+                    <!-- Section Titres -->
+                    <div class="game-section">
+                        <h2><img src="./icons/classement.png" alt="" class="title-icon"> Les Titres</h2>
+                        <p>Des titres exclusifs peuvent être débloqués en atteignant des objectifs spécifiques :</p>
+                        <div class="titles-list">
+                            <div class="title-requirement">
+                                <img src="./icons/dés.png" alt="" class="title-req-icon">
+                                <span>Lancer un certain nombre de dés</span>
+                            </div>
+                            <div class="title-requirement">
+                                <img src="./icons/combat.png" alt="" class="title-req-icon">
+                                <span>Gagner un certain nombre de combats</span>
+                            </div>
+                            <div class="title-requirement">
+                                <img src="./icons/coffre.png" alt="" class="title-req-icon">
+                                <span>Ouvrir des coffres</span>
+                            </div>
+                            <div class="title-requirement">
+                                <img src="./icons/statistiques.png" alt="" class="title-req-icon">
+                                <span>Augmenter vos stats à un niveau exceptionnel</span>
+                            </div>
+                            <div class="title-requirement">
+                                <img src="./icons/rank.png" alt="" class="title-req-icon">
+                                <span>Atteindre des rangs spécifiques</span>
+                            </div>
+                            <div class="title-requirement">
+                                <img src="./icons/xp.png" alt="" class="title-req-icon">
+                                <span>Et plein d'autres manières...</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Section XP -->
+                    <div class="game-section">
+                        <h2><img src="./icons/niveau.png" alt="" class="title-icon"> Expérience (XP)</h2>
+                        <p>Vous pourrez gagner de l'expérience en réalisant diverses actions :</p>
+                        <div class="xp-methods">
+                            <div class="xp-method">
+                                <img src="./icons/offrande.png" alt="" class="xp-method-icon">
+                                <span>Utiliser les points de chaîne</span>
+                            </div>
+                            <div class="xp-method">
+                                <img src="./icons/combat.png" alt="" class="xp-method-icon">
+                                <span>Combattre d'autres joueurs</span>
+                            </div>
+                            <div class="xp-method">
+                                <img src="./icons/message.png" alt="" class="xp-method-icon">
+                                <span>Envoyer des messages dans le chat Twitch</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Section Lore -->
+                    <div class="game-section lore-section">
+                        <h2><img src="./icons/lore.png" alt="" class="title-icon"> Le Lore</h2>
+                        <p>Découvrez l'histoire et l'univers d'Orora !</p>
+                        
+                        <!-- Vidéo de présentation -->
+                        <div class="lore-video-container">
+                            <iframe 
+                                src="https://www.youtube.com/embed/BCpUL7h_y-U" 
+                                title="Orora - Présentation du Lore"
+                                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" 
+                                allowfullscreen>
+                            </iframe>
+                        </div>
+
+                        <!-- Livre interactif -->
+                        <h3 class="book-title">📖 Journal du Lore</h3>
+                        <div class="book-wrapper">
+                            <div class="book" id="loreBook">
+                                <div class="book-click-zone left" onclick="prevPage()"></div>
+                                <div class="book-click-zone right" onclick="nextPage()"></div>
+                                
+                                <div class="book-page active" data-page="1">
+                                    <img src="./lore/ORORA-01.png" alt="Couverture">
+                                </div>
+                                <div class="book-page hidden" data-page="2">
+                                    <img src="./lore/ORORA-02.png" alt="Page 2">
+                                </div>
+                                <div class="book-page hidden" data-page="3">
+                                    <img src="./lore/ORORA-03.png" alt="Page 3">
+                                </div>
+                                <div class="book-page hidden" data-page="4">
+                                    <img src="./lore/ORORA-04.png" alt="Page 4">
+                                </div>
+                                <div class="book-page hidden" data-page="5">
+                                    <img src="./lore/ORORA-05.png" alt="Page 5">
+                                </div>
+                                <div class="book-page hidden" data-page="6">
+                                    <img src="./lore/ORORA-06.png" alt="Page 6">
+                                </div>
+                                <div class="book-page hidden" data-page="7">
+                                    <img src="./lore/ORORA-07.png" alt="Page 7">
+                                </div>
+                                <div class="book-page hidden" data-page="8">
+                                    <img src="./lore/ORORA-08.png" alt="Page 8">
+                                </div>
+                                <div class="book-page hidden" data-page="9">
+                                    <img src="./lore/ORORA-09.png" alt="Page 9">
+                                </div>
+                                <div class="book-page hidden" data-page="10">
+                                    <img src="./lore/ORORA-10.png" alt="Page 10">
+                                </div>
+                                <div class="book-page hidden" data-page="11">
+                                    <img src="./lore/ORORA-11.png" alt="Page 11">
+                                </div>
+                                <div class="book-page hidden" data-page="12">
+                                    <img src="./lore/ORORA-12.png" alt="Page 12">
+                                </div>
+                                <div class="book-page hidden" data-page="13">
+                                    <img src="./lore/ORORA-13.png" alt="Page 13">
+                                </div>
+                                <div class="book-page hidden" data-page="14">
+                                    <img src="./lore/ORORA-14.png" alt="Page 14">
+                                </div>
+                                <div class="book-page hidden" data-page="15">
+                                    <img src="./lore/ORORA-15.png" alt="Page 15">
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="book-controls">
+                            <button class="book-btn" id="prevBtn" onclick="prevPage()">◀ Précédent</button>
+                            <div class="page-indicator">
+                                <span id="currentPage">1</span> / <span id="totalPages">15</span>
+                            </div>
+                            <button class="book-btn" id="nextBtn" onclick="nextPage()">Suivant ▶</button>
+                        </div>
+                        
+                        <p class="book-instructions">💡 Cliquez sur les côtés du livre, utilisez les boutons, ou les flèches du clavier ← →</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- PAGE PROJET -->
+            <div id="page-projet" class="page">
+                <div class="project-container">
+                    <div class="project-section">
+                        <h2><img src="./icons/informations.png" alt="" class="title-icon"> Le Projet Orora</h2>
+                        <p>Orora est un jeu interactif jouable en direct sur Twitch. Créé par <a href="https://www.twitch.tv/clydecreator" target="_blank" class="creator-link clyde">ClydeCreator</a> et développé par <a href="https://www.twitch.tv/swalen_" target="_blank" class="creator-link swalen">Swalen</a>, c'est un jeu où VOUS êtes les personnages et où vous pouvez créer votre carte et augmenter vos statistiques pour devenir plus forts et vaincre d'autres viewers !</p>
+                        <p>Vous voulez participer ? Utilisez la récompense de point de chaîne "jouer à Orora" sur la chaîne Twitch de Clydecreator pendant un live !</p>
+                        <p>Créez votre personnage, combattez, collectionnez des armes légendaires, et gravissez les rangs pour devenir le héros le plus puissant d'Orora !</p>
+                    </div>
+
+                    <div class="project-section">
+                        <h2><img src="./icons/communauté.png" alt="" class="title-icon"> Rejoignez la Communauté</h2>
+                        <div class="social-blocks">
+                            <a href="https://twitch.tv/clydecreator" target="_blank" class="social-block twitch">
+                                <img src="./icons/Twitch.png" alt="Twitch" class="social-block-icon">
+                                <span class="social-block-name">Twitch</span>
+                            </a>
+                            <a href="https://youtube.com/@clydecreator" target="_blank" class="social-block youtube">
+                                <img src="./icons/Youtube.png" alt="YouTube" class="social-block-icon">
+                                <span class="social-block-name">YouTube</span>
+                            </a>
+                            <a href="https://tiktok.com/@clydecreator" target="_blank" class="social-block tiktok">
+                                <img src="./icons/Tiktok.png" alt="TikTok" class="social-block-icon">
+                                <span class="social-block-name">TikTok</span>
+                            </a>
+                            <a href="https://instagram.com/clydecreator" target="_blank" class="social-block instagram">
+                                <img src="./icons/Instagram.png" alt="Instagram" class="social-block-icon">
+                                <span class="social-block-name">Instagram</span>
+                            </a>
+                            <a href="https://discord.gg/NPH4G7wk2F" target="_blank" class="social-block discord">
+                                <img src="./icons/Discord.png" alt="Discord" class="social-block-icon">
+                                <span class="social-block-name">Discord</span>
+                            </a>
+                        </div>
+                    </div>
+
+                    <div class="project-section">
+                        <h2><img src="./icons/personnages.png" alt="" class="title-icon"> La Boutique TCG</h2>
+                        <p>À la fin de chaque saison, les viewers les plus présents et actifs ont l'honneur de voir leur carte intégrée dans le <strong>TCG physique d'ORORA</strong> !</p>
+                        <p>Des boosters sont créés et disponibles à la vente dans la boutique officielle. Collectionnez les cartes de vos viewers préférés !</p>
+                        <a href="https://www.clydetcg.fr/" target="_blank" class="shop-btn">
+                            <span>🛒</span> Accéder à la Boutique
+                        </a>
+                    </div>
+
+                    <div class="install-section">
+                        <h2><img src="./icons/download.png" alt="" class="title-icon"> Installer l'Application</h2>
+                        <p>Accédez à Orora directement depuis votre écran d'accueil !</p>
+                        
+                        <button class="install-btn" id="installBtn" onclick="installApp()">
+                            Installer Orora
+                        </button>
+
+                        <div class="install-instructions">
+                            <div class="install-card">
+                                <h3><img src="./icons/point.png" alt="" class="point-icon"> Android (Chrome)</h3>
+                                <ol>
+                                    <li>Ouvrez ce site dans <strong>Chrome</strong></li>
+                                    <li>Appuyez sur le menu <strong>⋮</strong> (3 points)</li>
+                                    <li>Sélectionnez <strong>"Installer l'application"</strong></li>
+                                    <li>Confirmez l'installation</li>
+                                </ol>
+                            </div>
+
+                            <div class="install-card">
+                                <h3><img src="./icons/point.png" alt="" class="point-icon"> iPhone (Safari)</h3>
+                                <ol>
+                                    <li>Ouvrez ce site dans <strong>Safari</strong></li>
+                                    <li>Appuyez sur <strong>Partager</strong> (carré avec flèche)</li>
+                                    <li>Faites défiler et choisissez <strong>"Sur l'écran d'accueil"</strong></li>
+                                    <li>Appuyez sur <strong>"Ajouter"</strong></li>
+                                </ol>
+                            </div>
+                        </div>
+
+                        <p class="install-note">💡 Une fois installée, l'application s'ouvre comme une app native et fonctionne même avec une connexion limitée !</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let allCharacters = [];
+        let weaponsData = {};
+        const rankIcons = {
+            "Fer": "./ranks/Fer.png",
+            "Bronze": "./ranks/Bronze.png",
+            "Argent": "./ranks/Argent.png",
+            "Or": "./ranks/Or.png",
+            "Maitre": "./ranks/Maitre.png",
+            "Scarlet": "./ranks/Scarlet.png",
+            "Non classé": "./ranks/Non_classe.png"
+        };
+
+        // NAVIGATION ENTRE LES PAGES
+        function changePage(pageName) {
+            // Cacher toutes les pages
+            document.querySelectorAll('.page').forEach(page => {
+                page.classList.remove('active');
+            });
+            
+            // Désactiver tous les boutons
+            document.querySelectorAll('.nav-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            
+            // Afficher la page sélectionnée
+            document.getElementById(`page-${pageName}`).classList.add('active');
+            
+            // Activer le bouton correspondant
+            event.target.classList.add('active');
+            
+            // Fermer les détails de personnage si ouverts
+            if (pageName !== 'personnages') {
+                closeCharacterDetail();
+            }
+            
+            // Si on va sur la page classement, rafraîchir le tableau
+            if (pageName === 'classement') {
+                updateRankingTable();
+            }
+            
+            // Si on va sur la page lore, reset le livre à la première page
+            if (pageName === 'lore') {
+                resetBook();
+            }
+        }
+
+        // LIVRE INTERACTIF - LORE
+        let currentBookPage = 1;
+        const totalBookPages = 15;
+
+        function updateBook() {
+            const pages = document.querySelectorAll('.book-page');
+            
+            pages.forEach((page, index) => {
+                const pageNum = index + 1;
+                page.classList.remove('active', 'flipped', 'hidden');
+                
+                if (pageNum === currentBookPage) {
+                    page.classList.add('active');
+                } else if (pageNum < currentBookPage) {
+                    page.classList.add('flipped');
+                } else {
+                    page.classList.add('hidden');
+                }
+            });
+
+            // Mettre à jour l'indicateur
+            document.getElementById('currentPage').textContent = currentBookPage;
+            
+            // Mettre à jour les boutons
+            document.getElementById('prevBtn').disabled = currentBookPage === 1;
+            document.getElementById('nextBtn').disabled = currentBookPage === totalBookPages;
+        }
+
+        function nextPage() {
+            if (currentBookPage < totalBookPages) {
+                currentBookPage++;
+                updateBook();
+            }
+        }
+
+        function prevPage() {
+            if (currentBookPage > 1) {
+                currentBookPage--;
+                updateBook();
+            }
+        }
+
+        function resetBook() {
+            currentBookPage = 1;
+            updateBook();
+        }
+
+        // Navigation clavier pour le livre
+        document.addEventListener('keydown', function(e) {
+            const lorePage = document.getElementById('page-lore');
+            if (lorePage && lorePage.classList.contains('active')) {
+                if (e.key === 'ArrowRight' || e.key === 'ArrowDown') {
+                    nextPage();
+                } else if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') {
+                    prevPage();
+                }
+            }
+        });
+
+        // Fonction pour parser un fichier INI
+        function parseINI(text) {
+            const lines = text.split('\n');
+            const result = {};
+            let currentSection = null;
+
+            for (let line of lines) {
+                line = line.trim();
+                
+                // Ignorer les lignes vides et commentaires
+                if (!line || line.startsWith(';') || line.startsWith('#')) continue;
+                
+                // Section
+                if (line.startsWith('[') && line.endsWith(']')) {
+                    currentSection = line.slice(1, -1).trim();
+                    result[currentSection] = {};
+                    continue;
+                }
+                
+                // Clé=Valeur
+                const equalIndex = line.indexOf('=');
+                if (equalIndex > -1 && currentSection) {
+                    const key = line.slice(0, equalIndex).trim();
+                    let value = line.slice(equalIndex + 1).trim();
+                    
+                    // Enlever les guillemets
+                    if ((value.startsWith('"') && value.endsWith('"')) || 
+                        (value.startsWith("'") && value.endsWith("'"))) {
+                        value = value.slice(1, -1);
+                    }
+                    
+                    result[currentSection][key] = value;
+                }
+            }
+            
+            return result;
+        }
+
+        // Charger un fichier INI
+        async function loadINI(filepath) {
+            try {
+                const response = await fetch(filepath);
+                if (!response.ok) throw new Error(`Erreur HTTP: ${response.status}`);
+                const text = await response.text();
+                return parseINI(text);
+            } catch (error) {
+                console.error(`Erreur lors du chargement de ${filepath}:`, error);
+                return {};
+            }
+        }
+
+        // Charger les personnages depuis les fichiers INI
+        async function loadCharacters() {
+            const factions = [
+                { name: 'Alliance', file: './data/alliance.ini', class: 'alliance' },
+                { name: 'Rébellion', file: './data/rebellion.ini', class: 'rebellion' },
+                { name: 'Tréfonds', file: './data/trefonds.ini', class: 'trefonds' }
+            ];
+
+            const characters = [];
+
+            for (const faction of factions) {
+                const data = await loadINI(faction.file);
+                
+                for (const [name, stats] of Object.entries(data)) {
+                    // Vérifier si la carte est créée
+                    if (stats['zz CreationCarte'] === 'Faite') {
+                        characters.push({
+                            name: name,
+                            faction: faction.name,
+                            factionClass: faction.class,
+                            niveau: parseInt(stats.Niveau) || 0,
+                            attaque: parseInt(stats.Attaque) || 0,
+                            defense: parseInt(stats.Defense) || 0,
+                            strategie: parseInt(stats.Strategie) || 0,
+                            vitesse: parseInt(stats.Vitesse) || 0,
+                            pv: parseInt(stats.PV) || 0,
+                            rang: stats.Rang || 'Non classé',
+                            titreAffiche: stats.TitreAffiche && stats.TitreAffiche !== '0.000000' ? stats.TitreAffiche : 'Sans titre',
+                            xp: parseInt(stats.XP) || 0,
+                            pointsTotaux: parseInt(stats.PointsTotaux) || 0,
+                            mmr: parseInt(stats.MMR) || 0,
+                            armeAffiche: stats.ArmeAffiche && stats.ArmeAffiche !== '0.000000' ? stats.ArmeAffiche : '',
+                            description: stats['zz Carte'] && stats['zz Carte'] !== '0.000000' ? stats['zz Carte'] : 'Aucune description'
+                        });
+                    }
+                }
+            }
+
+            // Trier par points totaux (du plus fort au plus faible)
+            characters.sort((a, b) => b.pointsTotaux - a.pointsTotaux);
+            
+            return characters;
+        }
+
+        // Charger les armes depuis les fichiers INI
+        async function loadWeapons() {
+            const rarities = [
+                { file: './data/commune.ini', rarity: 'commune', color: '#888', label: 'Commune' },
+                { file: './data/rare.ini', rarity: 'rare', color: '#3498db', label: 'Rare' },
+                { file: './data/epique.ini', rarity: 'epique', color: '#9b59b6', label: 'Épique' },
+                { file: './data/legendaire.ini', rarity: 'legendaire', color: '#f39c12', label: 'Légendaire' },
+                { file: './data/master.ini', rarity: 'master', color: '#ff1493', label: 'Master' }
+            ];
+
+            const weapons = {};
+
+            for (const rarityInfo of rarities) {
+                const data = await loadINI(rarityInfo.file);
+                weapons[rarityInfo.rarity] = {
+                    color: rarityInfo.color,
+                    label: rarityInfo.label,
+                    weapons: {}
+                };
+
+                // Format INI : [NomArme] puis liste de joueurs avec "0.000000"
+                for (const [weaponName, playersObj] of Object.entries(data)) {
+                    // playersObj est un objet avec les noms de joueurs comme clés
+                    // On récupère tous les joueurs (sauf "Création")
+                    const owners = Object.keys(playersObj).filter(name => name !== 'Création' && name !== 'CrÃ©ation');
+                    weapons[rarityInfo.rarity].weapons[weaponName] = owners;
+                }
+            }
+
+            return weapons;
+        }
+
+        // Obtenir les infos d'une arme
+        function getWeaponInfo(weaponName) {
+            for (const [rarity, data] of Object.entries(weaponsData)) {
+                if (data.weapons[weaponName]) {
+                    return {
+                        name: weaponName,
+                        rarity: rarity,
+                        color: data.color,
+                        label: data.label
+                    };
+                }
+            }
+            return null;
+        }
+
+        // Obtenir les armes d'un joueur
+        function getPlayerWeapons(playerName) {
+            const weapons = [];
+            const name = playerName.toLowerCase();
+            
+            for (const [rarity, data] of Object.entries(weaponsData)) {
+                for (const [weaponName, owners] of Object.entries(data.weapons)) {
+                    if (owners.some(o => o.toLowerCase() === name)) {
+                        weapons.push({
+                            name: weaponName,
+                            rarity: rarity,
+                            color: data.color,
+                            label: data.label
+                        });
+                    }
+                }
+            }
+            
+            return weapons;
+        }
+
+        // Obtenir la classe de couleur du niveau
+        function getLevelClass(niveau) {
+            if (niveau >= 100) return 'level-max';
+            if (niveau >= 91) return 'level-gold';
+            if (niveau >= 71) return 'level-purple';
+            if (niveau >= 50) return 'level-blue';
+            if (niveau >= 26) return 'level-green';
+            return 'level-gray';
+        }
+
+        // Obtenir la classe de couleur du rang
+        function getRankClass(rang) {
+            switch(rang) {
+                case 'Scarlet': return 'rank-scarlet';
+                case 'Maitre': return 'rank-maitre';
+                case 'Or': return 'rank-or';
+                case 'Argent': return 'rank-argent';
+                case 'Bronze': return 'rank-bronze';
+                case 'Fer': return 'rank-fer';
+                default: return 'rank-nonclasse';
+            }
+        }
+
+        // Afficher la grille de personnages
+        function displayCharacters(characters) {
+            const grid = document.getElementById('characterGrid');
+            const noResults = document.getElementById('noResults');
+            
+            if (characters.length === 0) {
+                grid.style.display = 'none';
+                noResults.style.display = 'block';
+                return;
+            }
+            
+            grid.style.display = 'grid';
+            noResults.style.display = 'none';
+            
+            grid.innerHTML = characters.map((char, index) => `
+                <div class="character-card ${char.factionClass}" onclick="showCharacterDetail('${char.name}')" data-index="${index}">
+                    <div class="character-card-inner">
+                        <div class="character-card-front">
+                            <img src="./cards/${char.name}.png" alt="${char.name}" class="character-card-bg" onerror="this.src='data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 300 400%22%3E%3Crect fill=%22%23333%22 width=%22300%22 height=%22400%22/%3E%3C/svg%3E'">
+                            <div class="character-card-content">
+                                <div class="faction-badge ${char.factionClass}">${char.faction}</div>
+                                <h3>${char.name}</h3>
+                                <div class="character-card-info"><span class="${getLevelClass(char.niveau)}">Niveau ${char.niveau}</span> • ${char.rang}</div>
+                            </div>
+                        </div>
+                        <div class="character-card-back">
+                            <img src="./cards/dos.png" alt="Dos de carte">
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+            
+            // Animation de retournement séquentiel
+            revealCardsSequentially();
+        }
+
+        // Animation de retournement des cartes une par une
+        function revealCardsSequentially() {
+            const cards = document.querySelectorAll('.character-card:not(.revealed)');
+            const delay = 50; // Délai entre chaque carte en ms
+            
+            cards.forEach((card, index) => {
+                setTimeout(() => {
+                    card.classList.add('revealed');
+                }, index * delay);
+            });
+            
+            // Ajouter l'effet 3D après le reveal
+            setTimeout(() => {
+                initCardTiltEffect();
+            }, cards.length * delay + 500);
+        }
+
+        // Effet 3D au hover sur les cartes de personnages
+        function initCardTiltEffect() {
+            // Ne pas appliquer sur mobile/tactile
+            if (window.matchMedia('(max-width: 768px)').matches || 'ontouchstart' in window) {
+                return;
+            }
+            
+            const cards = document.querySelectorAll('.character-card.revealed');
+            
+            cards.forEach(card => {
+                const inner = card.querySelector('.character-card-inner');
+                if (!inner) return;
+                
+                card.addEventListener('mousemove', (e) => {
+                    const rect = card.getBoundingClientRect();
+                    const centerX = rect.left + rect.width / 2;
+                    const centerY = rect.top + rect.height / 2;
+                    
+                    // Calculer la rotation (max ±10 degrés)
+                    const rotateY = ((e.clientX - centerX) / (rect.width / 2)) * 10;
+                    const rotateX = -((e.clientY - centerY) / (rect.height / 2)) * 10;
+                    
+                    inner.classList.add('tilt');
+                    inner.style.transform = `rotateX(${rotateX}deg) rotateY(${rotateY}deg)`;
+                });
+                
+                card.addEventListener('mouseleave', () => {
+                    inner.classList.remove('tilt');
+                    inner.style.transform = 'rotateY(0deg) rotateX(0deg)';
+                });
+            });
+        }
+
+        // Afficher les détails d'un personnage
+        function showCharacterDetail(characterName) {
+            const character = allCharacters.find(c => c.name === characterName);
+            if (!character) return;
+
+            const detailDiv = document.getElementById('characterDetail');
+            detailDiv.className = `character-detail ${character.factionClass}`;
+            detailDiv.style.display = 'block';
+            
+            const rankIcon = rankIcons[character.rang] || "";
+            
+            // Armes de Noël 2025
+            const christmasWeaponsEquipped = [
+                'Christmas Star Shuriken',
+                'Candy Blaze Shooter',
+                'Polar Eagle',
+                'Revol-Vert',
+                'BazooKado'
+            ];
+            
+            let equippedWeaponHTML = '';
+            if (character.armeAffiche && character.armeAffiche !== '0.000000' && character.armeAffiche !== '') {
+                const weapon = getWeaponInfo(character.armeAffiche);
+                if (weapon) {
+                    const isChristmasEquipped = christmasWeaponsEquipped.includes(weapon.name);
+                    equippedWeaponHTML = `
+                        <div class="equipped-weapon-section">
+                            <h3 class="section-title"><img src="./icons/armeequipee.png" alt="" class="section-icon"> Arme équipée</h3>
+                            <div class="equipped-weapon-card ${weapon.rarity}">
+                                ${isChristmasEquipped ? '<span class="weapon-event-badge">🎄 Noël 2025</span>' : ''}
+                                <img src="./weapons/${weapon.name}.png" alt="${weapon.name}" class="equipped-weapon-image">
+                                <div class="equipped-weapon-info">
+                                    <div class="equipped-weapon-name">${weapon.name}</div>
+                                    <div class="equipped-weapon-rarity" style="background: ${weapon.color};">${weapon.label}</div>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                }
+            }
+            
+            detailDiv.innerHTML = `
+                <button class="close-detail-btn" onclick="closeCharacterDetail()">×</button>
+                <div class="detail-header">
+                    <img src="./cards/${character.name}.png" alt="${character.name}" class="card-image ${character.factionClass}" onclick="openLightbox('./cards/${character.name}.png')">
+                    <div class="detail-info">
+                        <div class="faction-badge ${character.factionClass}">${character.faction}</div>
+                        <h2>${character.name}</h2>
+                        ${rankIcon ? `<div class="rank-badge"><img src="${rankIcon}" class="rank-icon"><span style="font-size: 1.3em; font-weight: bold;">${character.rang}</span></div>` : `<p><strong>Rang:</strong> ${character.rang}</p>`}
+                        <p style="font-size: 1.2em; margin: 10px 0;"><strong>Niveau:</strong> <span class="${getLevelClass(character.niveau)}" style="font-weight: bold;">${character.niveau}</span></p>
+                        <p style="font-size: 1.1em; color: #888;"><strong>Titre:</strong> ${character.titreAffiche}</p>
+                        <p style="font-size: 0.9em; color: #666; margin-top: 10px;">XP: ${character.xp.toLocaleString()}</p>
+                    </div>
+                </div>
+
+                <h3 class="section-title"><img src="./icons/stats.png" alt="" class="section-icon"> Statistiques</h3>
+                <div class="stats-grid">
+                    <div class="stat-box">
+                        <div class="stat-label">⚔️ Attaque</div>
+                        <div class="stat-value" style="color: #e74c3c;">${character.attaque}</div>
+                    </div>
+                    <div class="stat-box">
+                        <div class="stat-label">🛡️ Défense</div>
+                        <div class="stat-value" style="color: #3498db;">${character.defense}</div>
+                    </div>
+                    <div class="stat-box">
+                        <div class="stat-label">🧠 Stratégie</div>
+                        <div class="stat-value" style="color: #9b59b6;">${character.strategie}</div>
+                    </div>
+                    <div class="stat-box">
+                        <div class="stat-label">⚡ Vitesse</div>
+                        <div class="stat-value" style="color: #f39c12;">${character.vitesse}</div>
+                    </div>
+                    <div class="stat-box">
+                        <div class="stat-label">❤️ PV</div>
+                        <div class="stat-value" style="color: #e74c3c;">${character.pv}</div>
+                    </div>
+                </div>
+
+                <div class="description-box">
+                    <h3 class="section-title"><img src="./icons/informations.png" alt="" class="section-icon"> Description</h3>
+                    <p style="line-height: 1.6; color: #ccc;">${character.description}</p>
+                </div>
+
+                ${equippedWeaponHTML}
+
+                <div class="weapons-section">
+                    <h3 class="section-title"><img src="./icons/armes.png" alt="" class="section-icon"> Armes débloquées</h3>
+                    <div class="weapons-grid" id="weaponsGrid"></div>
+                </div>
+
+                <button class="close-btn" onclick="closeCharacterDetail()">Fermer</button>
+            `;
+            
+            const playerWeapons = getPlayerWeapons(character.name);
+            const weaponsGrid = document.getElementById('weaponsGrid');
+            
+            // Armes de Noël 2025
+            const christmasWeapons = [
+                'Christmas Star Shuriken',
+                'Candy Blaze Shooter',
+                'Polar Eagle',
+                'Revol-Vert',
+                'BazooKado'
+            ];
+            
+            if (playerWeapons.length > 0) {
+                weaponsGrid.innerHTML = playerWeapons.map(weapon => {
+                    const isChristmas = christmasWeapons.includes(weapon.name);
+                    return `
+                    <div class="weapon-card ${weapon.rarity}">
+                        ${isChristmas ? '<span class="weapon-event-badge">🎄 Noël 2025</span>' : ''}
+                        <img src="./weapons/${weapon.name}.png" alt="${weapon.name}" class="weapon-image">
+                        <div class="weapon-info">
+                            <div class="weapon-name">${weapon.name}</div>
+                            <div class="weapon-rarity" style="background: ${weapon.color};">${weapon.label}</div>
+                        </div>
+                    </div>
+                `}).join('');
+            } else {
+                weaponsGrid.innerHTML = '<p style="color: #888; text-align: center; padding: 20px;">Aucune arme débloquée</p>';
+            }
+
+            detailDiv.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+
+        function closeCharacterDetail() {
+            document.getElementById('characterDetail').style.display = 'none';
+        }
+
+        // Lightbox pour afficher la carte en grand avec effet 3D
+        let isMouseDown = false;
+        let cardContainer = null;
+
+        function openLightbox(imageSrc) {
+            const lightbox = document.getElementById('lightbox');
+            const lightboxImage = document.getElementById('lightboxImage');
+            cardContainer = document.getElementById('lightboxCardContainer');
+            
+            lightboxImage.src = imageSrc;
+            lightbox.classList.add('active');
+            document.body.style.overflow = 'hidden';
+            
+            // Reset la transformation
+            cardContainer.style.transform = 'rotateX(0deg) rotateY(0deg)';
+        }
+
+        function closeLightbox() {
+            const lightbox = document.getElementById('lightbox');
+            lightbox.classList.remove('active');
+            document.body.style.overflow = '';
+            
+            // Reset
+            if (cardContainer) {
+                cardContainer.style.transform = 'rotateX(0deg) rotateY(0deg)';
+                cardContainer.classList.remove('active');
+            }
+            isMouseDown = false;
+        }
+
+        function handleLightboxClick(event) {
+            // Fermer seulement si on clique en dehors de la carte
+            if (event.target.id === 'lightbox') {
+                closeLightbox();
+            }
+        }
+
+        // Effet 3D sur la carte
+        function handleCardMove(e) {
+            if (!cardContainer) return;
+            
+            const rect = cardContainer.getBoundingClientRect();
+            const centerX = rect.left + rect.width / 2;
+            const centerY = rect.top + rect.height / 2;
+            
+            // Position de la souris ou du doigt
+            let clientX, clientY;
+            if (e.touches) {
+                clientX = e.touches[0].clientX;
+                clientY = e.touches[0].clientY;
+            } else {
+                clientX = e.clientX;
+                clientY = e.clientY;
+            }
+            
+            // Calculer la rotation (max ±15 degrés)
+            const rotateY = ((clientX - centerX) / (rect.width / 2)) * 15;
+            const rotateX = -((clientY - centerY) / (rect.height / 2)) * 15;
+            
+            // Calculer la position du reflet lumineux (en %)
+            const mouseXPercent = ((clientX - rect.left) / rect.width) * 100;
+            const mouseYPercent = ((clientY - rect.top) / rect.height) * 100;
+            
+            // Calculer l'angle du reflet arc-en-ciel
+            const angle = Math.atan2(clientY - centerY, clientX - centerX) * (180 / Math.PI) + 135;
+            
+            // Appliquer les transformations
+            cardContainer.style.transform = `rotateX(${rotateX}deg) rotateY(${rotateY}deg)`;
+            cardContainer.style.setProperty('--mouse-x', `${mouseXPercent}%`);
+            cardContainer.style.setProperty('--mouse-y', `${mouseYPercent}%`);
+            cardContainer.style.setProperty('--shine-angle', `${angle}deg`);
+        }
+
+        // Event listeners pour l'effet 3D
+        document.addEventListener('DOMContentLoaded', function() {
+            const lightbox = document.getElementById('lightbox');
+            
+            // Souris
+            lightbox.addEventListener('mousemove', function(e) {
+                if (cardContainer && lightbox.classList.contains('active')) {
+                    cardContainer.classList.add('active');
+                    handleCardMove(e);
+                }
+            });
+            
+            lightbox.addEventListener('mouseleave', function() {
+                if (cardContainer) {
+                    cardContainer.style.transform = 'rotateX(0deg) rotateY(0deg)';
+                    cardContainer.classList.remove('active');
+                }
+            });
+            
+            // Touch (mobile)
+            lightbox.addEventListener('touchstart', function(e) {
+                if (cardContainer) {
+                    isMouseDown = true;
+                    cardContainer.classList.add('active');
+                }
+            }, { passive: true });
+            
+            lightbox.addEventListener('touchmove', function(e) {
+                if (cardContainer && isMouseDown && lightbox.classList.contains('active')) {
+                    handleCardMove(e);
+                }
+            }, { passive: true });
+            
+            lightbox.addEventListener('touchend', function() {
+                if (cardContainer) {
+                    cardContainer.style.transform = 'rotateX(0deg) rotateY(0deg)';
+                    cardContainer.classList.remove('active');
+                    isMouseDown = false;
+                }
+            });
+        });
+
+        // Fermer le lightbox avec la touche Escape
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') {
+                closeLightbox();
+            }
+        });
+
+        // CLASSEMENT - Variables pour les filtres
+        let activeFactions = ['Alliance', 'Rébellion', 'Tréfonds'];
+        let currentSort = 'power';
+        let rankingSearchTerm = '';
+
+        function toggleFaction(faction) {
+            const index = activeFactions.indexOf(faction);
+            if (index > -1) {
+                // Ne pas désactiver si c'est la dernière faction active
+                if (activeFactions.length > 1) {
+                    activeFactions.splice(index, 1);
+                }
+            } else {
+                activeFactions.push(faction);
+            }
+            
+            // Mettre à jour les boutons
+            document.querySelectorAll('.faction-btn').forEach(btn => {
+                const btnFaction = btn.dataset.faction;
+                if (activeFactions.includes(btnFaction)) {
+                    btn.classList.add('active');
+                } else {
+                    btn.classList.remove('active');
+                }
+            });
+            
+            updateRankingTable();
+        }
+
+        function setSort(sort) {
+            currentSort = sort;
+            
+            // Mettre à jour les boutons
+            document.querySelectorAll('.sort-btn').forEach(btn => {
+                if (btn.dataset.sort === sort) {
+                    btn.classList.add('active');
+                } else {
+                    btn.classList.remove('active');
+                }
+            });
+            
+            updateRankingTable();
+        }
+
+        function updateRankingTable() {
+            let allFiltered = [...allCharacters];
+
+            // Filtrer par factions actives
+            allFiltered = allFiltered.filter(c => activeFactions.includes(c.faction));
+
+            // Ordre des rangs du meilleur au moins bon
+            const rankOrder = {
+                'Scarlet': 7,
+                'Maitre': 6,
+                'Or': 5,
+                'Argent': 4,
+                'Bronze': 3,
+                'Fer': 2,
+                'Non classé': 1
+            };
+
+            // Trier TOUS les personnages d'abord pour obtenir leur position globale
+            switch(currentSort) {
+                case 'power':
+                    allFiltered.sort((a, b) => b.pointsTotaux - a.pointsTotaux);
+                    break;
+                case 'level':
+                    allFiltered.sort((a, b) => b.niveau - a.niveau);
+                    break;
+                case 'rank':
+                    allFiltered.sort((a, b) => {
+                        const rankDiff = (rankOrder[b.rang] || 0) - (rankOrder[a.rang] || 0);
+                        if (rankDiff !== 0) return rankDiff;
+                        return (b.mmr || 0) - (a.mmr || 0);
+                    });
+                    break;
+            }
+
+            // Assigner les positions AVANT de filtrer par recherche
+            const withPositions = allFiltered.map((char, index) => ({
+                ...char,
+                globalPosition: index + 1
+            }));
+
+            // Filtrer par recherche APRÈS avoir assigné les positions
+            let toDisplay = withPositions;
+            if (rankingSearchTerm) {
+                toDisplay = withPositions.filter(c => c.name.toLowerCase().includes(rankingSearchTerm));
+            }
+
+            const table = document.getElementById('rankingTable');
+            let html = '';
+
+            toDisplay.forEach((char) => {
+                const position = char.globalPosition;
+                let positionClass = '';
+                let rowClass = '';
+                if (position === 1) { positionClass = 'top1'; rowClass = 'top1-row'; }
+                else if (position === 2) { positionClass = 'top2'; rowClass = 'top2-row'; }
+                else if (position === 3) { positionClass = 'top3'; rowClass = 'top3-row'; }
+
+                // Icône de rang
+                const rankIcon = rankIcons[char.rang] || "";
+                
+                // Classe pour noms longs (plus de 12 caractères)
+                const nameClass = char.name.length > 12 ? 'long-name' : '';
+
+                html += `
+                    <div class="ranking-row ${rowClass}" onclick="changePage('personnages'); setTimeout(() => showCharacterDetail('${char.name}'), 100)">
+                        <div class="rank-position ${positionClass}">#${position}</div>
+                        <img src="./cards/${char.name}.png" alt="${char.name}" class="player-avatar ${char.factionClass}" onerror="this.src='data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 60 80%22%3E%3Crect fill=%22%23333%22 width=%2260%22 height=%2280%22/%3E%3C/svg%3E'">
+                        <div class="player-info">
+                            <div class="player-name-container">
+                                <span class="player-name ${nameClass}">${char.name}</span>
+                                <span class="player-faction ${char.factionClass}">${char.faction}</span>
+                            </div>
+                        </div>
+                        <div class="ranking-stats">
+                            <div class="ranking-stat hide-mobile">
+                                <span class="ranking-stat-label">Niveau</span>
+                                <span class="ranking-stat-value ${getLevelClass(char.niveau)}">${char.niveau}</span>
+                            </div>
+                            <div class="ranking-stat hide-mobile">
+                                <span class="ranking-stat-label">Rang</span>
+                                <span class="ranking-stat-value rank-display">
+                                    ${rankIcon ? `<img src="${rankIcon}" class="rank-icon-small" alt="${char.rang}">` : ''}
+                                    <span class="${getRankClass(char.rang)}">${char.mmr}</span>
+                                </span>
+                            </div>
+                            <div class="ranking-stat hide-mobile">
+                                <span class="ranking-stat-label">Puissance</span>
+                                <span class="ranking-stat-value" style="color: #f39c12;">${char.pointsTotaux.toLocaleString()}</span>
+                            </div>
+                            <div class="ranking-stat mobile-stat mobile-power">
+                                <span class="mobile-stat-label">Puissance</span>
+                                <span style="color: #f39c12;">${char.pointsTotaux.toLocaleString()}</span>
+                            </div>
+                            <div class="ranking-stat mobile-stat mobile-level">
+                                <span class="mobile-stat-label">Niveau</span>
+                                <span class="${getLevelClass(char.niveau)}">${char.niveau}</span>
+                            </div>
+                            <div class="ranking-stat mobile-stat mobile-rank">
+                                <span class="mobile-stat-label ${getRankClass(char.rang)}">${char.rang}</span>
+                                ${rankIcon ? `<img src="${rankIcon}" class="rank-icon-small">` : ''}
+                            </div>
+                        </div>
+                    </div>
+                `;
+            });
+
+            table.innerHTML = html;
+        }
+
+        window.toggleFaction = toggleFaction;
+        window.setSort = setSort;
+
+        // Recherche page Cartes
+        document.getElementById('searchInput').addEventListener('input', function(e) {
+            const searchTerm = e.target.value.toLowerCase().trim();
+            
+            if (searchTerm === '') {
+                displayCharacters(allCharacters);
+                return;
+            }
+            
+            const filtered = allCharacters.filter(char => char.name.toLowerCase().includes(searchTerm));
+            displayCharacters(filtered);
+        });
+
+        // Recherche page Classement
+        document.getElementById('rankingSearchInput').addEventListener('input', function(e) {
+            rankingSearchTerm = e.target.value.toLowerCase().trim();
+            updateRankingTable();
+        });
+
+        // Initialisation
+        async function init() {
+            try {
+                // Charger les données
+                weaponsData = await loadWeapons();
+                allCharacters = await loadCharacters();
+                
+                // Afficher le contenu
+                document.getElementById('loadingScreen').style.display = 'none';
+                document.getElementById('mainContent').style.display = 'block';
+                
+                displayCharacters(allCharacters);
+                displayWeaponsShowcase();
+                
+                console.log(`✅ ${allCharacters.length} personnages chargés`);
+                console.log(`✅ Armes chargées pour ${Object.keys(weaponsData).length} raretés`);
+            } catch (error) {
+                console.error('❌ Erreur lors du chargement:', error);
+                document.getElementById('loadingScreen').innerHTML = `
+                    <div style="text-align: center;">
+                        <p style="color: #e74c3c; font-size: 1.5em;">❌ Erreur lors du chargement</p>
+                        <p style="font-size: 0.9em; margin-top: 20px; color: #888;">
+                            Vérifiez que les fichiers INI sont dans le dossier <strong>data/</strong>
+                        </p>
+                    </div>
+                `;
+            }
+        }
+
+        // Afficher les armes dans la page Le Jeu
+        function displayWeaponsShowcase() {
+            const container = document.getElementById('weaponsShowcase');
+            if (!container || !weaponsData) return;
+
+            // Armes de Noël 2025
+            const christmasWeapons = [
+                'Christmas Star Shuriken',
+                'Candy Blaze Shooter',
+                'Polar Eagle',
+                'Revol-Vert',
+                'BazooKado'
+            ];
+
+            // Ordre d'affichage : du moins rare au plus rare
+            const rarityOrder = [
+                { key: 'commune', label: 'Commune', class: 'commune' },
+                { key: 'rare', label: 'Rare', class: 'rare' },
+                { key: 'epique', label: 'Épique', class: 'epique' },
+                { key: 'legendaire', label: 'Légendaire', class: 'legendaire' },
+                { key: 'master', label: 'Master', class: 'master' }
+            ];
+
+            let html = '';
+
+            rarityOrder.forEach(rarity => {
+                const rarityData = weaponsData[rarity.key];
+                if (!rarityData || !rarityData.weapons) return;
+                
+                const weaponNames = Object.keys(rarityData.weapons);
+                if (weaponNames.length === 0) return;
+
+                html += `
+                    <div class="weapons-rarity-section">
+                        <h3 class="weapons-rarity-title ${rarity.class}">${rarity.label} (${weaponNames.length})</h3>
+                        <div class="weapons-rarity-grid">
+                `;
+
+                weaponNames.forEach(weaponName => {
+                    const isChristmas = christmasWeapons.includes(weaponName);
+                    html += `
+                        <div class="weapon-showcase-card ${rarity.class}">
+                            ${isChristmas ? '<span class="weapon-event-badge">🎄 Noël 2025</span>' : ''}
+                            <img src="./weapons/${weaponName}.png" alt="${weaponName}" class="weapon-showcase-img" onerror="this.style.opacity='0.3'">
+                            <div class="weapon-showcase-name">${weaponName}</div>
+                        </div>
+                    `;
+                });
+
+                html += `
+                        </div>
+                    </div>
+                `;
+            });
+
+            container.innerHTML = html;
+        }
+
+        window.showCharacterDetail = showCharacterDetail;
+        window.closeCharacterDetail = closeCharacterDetail;
+        window.openLightbox = openLightbox;
+        window.closeLightbox = closeLightbox;
+        window.handleLightboxClick = handleLightboxClick;
+        window.changePage = changePage;
+        window.nextPage = nextPage;
+        window.prevPage = prevPage;
+        window.resetBook = resetBook;
+        window.getLevelClass = getLevelClass;
+        window.getRankClass = getRankClass;
+
+        // Lancer le chargement au démarrage
+        init();
+
+        // PWA - Gestion du bouton d'installation
+        let deferredPrompt;
+
+        window.addEventListener('beforeinstallprompt', (e) => {
+            // Empêcher Chrome d'afficher automatiquement la popup
+            e.preventDefault();
+            // Stocker l'événement pour l'utiliser plus tard
+            deferredPrompt = e;
+            // Afficher le bouton d'installation
+            const installBtn = document.getElementById('installBtn');
+            if (installBtn) {
+                installBtn.classList.add('show');
+            }
+            console.log('✅ Installation PWA disponible');
+        });
+
+        function installApp() {
+            if (!deferredPrompt) {
+                alert('Pour installer l\'application, utilisez le menu de votre navigateur ou suivez les instructions ci-dessous.');
+                return;
+            }
+            
+            // Afficher la popup d'installation
+            deferredPrompt.prompt();
+            
+            // Attendre la réponse de l'utilisateur
+            deferredPrompt.userChoice.then((choiceResult) => {
+                if (choiceResult.outcome === 'accepted') {
+                    console.log('✅ Installation acceptée');
+                    // Cacher le bouton après l'installation
+                    const installBtn = document.getElementById('installBtn');
+                    if (installBtn) {
+                        installBtn.classList.remove('show');
+                    }
+                } else {
+                    console.log('❌ Installation refusée');
+                }
+                deferredPrompt = null;
+            });
+        }
+
+        window.installApp = installApp;
+
+        // Détecter si l'app est déjà installée
+        window.addEventListener('appinstalled', () => {
+            console.log('✅ PWA installée avec succès');
+            const installBtn = document.getElementById('installBtn');
+            if (installBtn) {
+                installBtn.classList.remove('show');
+            }
+        });
+    </script>
+
+    <!-- Enregistrement du Service Worker pour PWA -->
+    <script>
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('service-worker.js')
+                    .then((registration) => {
+                        console.log('✅ Service Worker enregistré:', registration.scope);
+                    })
+                    .catch((error) => {
+                        console.log('❌ Erreur Service Worker:', error);
+                    });
+            });
+        }
+    </script>
+</body>
+</html>
