@@ -302,6 +302,7 @@
             height: 100%;
             object-fit: cover;
             border-radius: 15px;
+            transition: opacity 0.4s ease;
         }
 
         .character-card-content {
@@ -605,36 +606,45 @@
 
         .carousel-wrapper {
             position: relative;
-            display: flex;
-            align-items: center;
-            gap: 6px;
+            width: 300px;
+        }
+
+        .carousel-wrapper .card-image {
+            width: 300px;
+            display: block;
+        }
+
+        /* Transition de fondu entre les cartes */
+        .carousel-wrapper .card-image {
+            transition: opacity 0.5s ease, transform 0.3s ease;
         }
 
         .carousel-btn {
-            background: rgba(255, 255, 255, 0.12);
-            border: 1px solid rgba(255, 255, 255, 0.2);
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            z-index: 5;
+            background: rgba(0, 0, 0, 0.45);
+            border: 1px solid rgba(255, 255, 255, 0.25);
             color: #fff;
             font-size: 2em;
-            width: 34px;
-            height: 60px;
+            width: 36px;
+            height: 56px;
             border-radius: 8px;
             cursor: pointer;
             display: flex;
             align-items: center;
             justify-content: center;
             transition: background 0.2s ease;
-            flex-shrink: 0;
             line-height: 1;
             padding: 0;
         }
 
-        .carousel-btn:hover {
-            background: rgba(255, 255, 255, 0.25);
-        }
+        .carousel-btn-left  { left: 8px; }
+        .carousel-btn-right { right: 8px; }
 
-        .carousel-wrapper .card-image {
-            flex: 1;
-            width: 100%;
+        .carousel-btn:hover {
+            background: rgba(0, 0, 0, 0.7);
         }
 
         .carousel-dots {
@@ -2844,14 +2854,22 @@
             }
 
             .card-carousel {
-                width: auto;
+                width: 120px;
                 flex-shrink: 0;
             }
 
+            .carousel-wrapper {
+                width: 120px;
+            }
+
+            .carousel-wrapper .card-image {
+                width: 120px;
+            }
+
             .carousel-btn {
-                width: 26px;
-                height: 46px;
-                font-size: 1.4em;
+                width: 24px;
+                height: 40px;
+                font-size: 1.3em;
             }
 
             .card-illustration {
@@ -3907,7 +3925,7 @@
                             mmr: parseInt(stats.MMR) || 0,
                             armeAffiche: stats.ArmeAffiche && stats.ArmeAffiche !== '0.000000' ? stats.ArmeAffiche : '',
                             description: stats['zz Carte'] && stats['zz Carte'] !== '0.000000' ? stats['zz Carte'] : 'Aucune description',
-                            illustration: stats['Illustration'] && stats['Illustration'] !== '0.000000' ? stats['Illustration'] : ''
+                            illustration: (stats['Illustration'] || stats['illustration'] || stats['ILLUSTRATION'] || '')
                         });
                     }
                 }
@@ -4250,23 +4268,78 @@
             return images;
         }
 
-        // Configure le carousel si plusieurs cartes
+        // Cache des images multi-cartes (nom → [src1, src2, ...])
+        let multiCardCache = {};
+
+        // Pré-charge la détection multi-cartes pour tous les personnages
+        async function preloadMultiCards(characters) {
+            await Promise.all(characters.map(async (char) => {
+                const imgs = await detectCardImages(char.name);
+                if (imgs.length > 1) multiCardCache[char.name] = imgs;
+            }));
+        }
+
+        // Lance le crossfade automatique sur les cartes de la grille
+        const gridIntervals = [];
+
+        function startGridCarousels() {
+            // Arrêter les intervals précédents
+            gridIntervals.forEach(id => clearInterval(id));
+            gridIntervals.length = 0;
+
+            document.querySelectorAll('.character-card').forEach(card => {
+                const name = card.querySelector('h3')?.textContent;
+                if (!name || !multiCardCache[name]) return;
+
+                const images = multiCardCache[name];
+                const bg = card.querySelector('.character-card-bg');
+                if (!bg) return;
+
+                let idx = 0;
+                const id = setInterval(() => {
+                    idx = (idx + 1) % images.length;
+                    bg.style.opacity = '0';
+                    setTimeout(() => {
+                        bg.src = images[idx];
+                        bg.style.opacity = '1';
+                    }, 400);
+                }, 5000);
+                gridIntervals.push(id);
+            });
+        }
+
+        // Configure le carousel dans le détail avec auto-scroll + navigation manuelle
         async function setupCardCarousel(character) {
             const images = await detectCardImages(character.name);
-            if (images.length <= 1) return; // Une seule carte, pas de carousel
+            if (images.length <= 1) return;
 
             const carousel = document.getElementById('cardCarousel');
             if (!carousel) return;
 
             let currentIndex = 0;
+            let autoTimer = null;
+
+            function goTo(idx) {
+                currentIndex = (idx + images.length) % images.length;
+                renderCarousel();
+                resetAutoTimer();
+            }
+
+            function resetAutoTimer() {
+                if (autoTimer) clearInterval(autoTimer);
+                autoTimer = setInterval(() => {
+                    currentIndex = (currentIndex + 1) % images.length;
+                    renderCarousel();
+                }, 5000);
+            }
 
             function renderCarousel() {
                 const src = images[currentIndex];
                 carousel.innerHTML = `
                     <div class="carousel-wrapper">
-                        <button class="carousel-btn carousel-btn-left" onclick="event.stopPropagation()">&#8249;</button>
                         <img src="${src}" alt="${character.name}" class="card-image ${character.factionClass}" onclick="openLightbox('${src}')">
-                        <button class="carousel-btn carousel-btn-right" onclick="event.stopPropagation()">&#8250;</button>
+                        <button class="carousel-btn carousel-btn-left">&#8249;</button>
+                        <button class="carousel-btn carousel-btn-right">&#8250;</button>
                     </div>
                     <div class="carousel-dots">
                         ${images.map((_, i) => `<span class="carousel-dot${i === currentIndex ? ' active' : ''}" data-index="${i}"></span>`).join('')}
@@ -4275,24 +4348,29 @@
 
                 carousel.querySelector('.carousel-btn-left').addEventListener('click', (e) => {
                     e.stopPropagation();
-                    currentIndex = (currentIndex - 1 + images.length) % images.length;
-                    renderCarousel();
+                    goTo(currentIndex - 1);
                 });
                 carousel.querySelector('.carousel-btn-right').addEventListener('click', (e) => {
                     e.stopPropagation();
-                    currentIndex = (currentIndex + 1) % images.length;
-                    renderCarousel();
+                    goTo(currentIndex + 1);
                 });
                 carousel.querySelectorAll('.carousel-dot').forEach(dot => {
                     dot.addEventListener('click', (e) => {
                         e.stopPropagation();
-                        currentIndex = parseInt(dot.dataset.index);
-                        renderCarousel();
+                        goTo(parseInt(dot.dataset.index));
                     });
                 });
             }
 
             renderCarousel();
+            resetAutoTimer();
+
+            // Arrêter le timer quand on ferme le détail
+            const origClose = window.closeCharacterDetail;
+            window.closeCharacterDetail = function() {
+                if (autoTimer) clearInterval(autoTimer);
+                origClose();
+            };
         }
 
         function closeCharacterDetail() {
@@ -4583,11 +4661,12 @@
             
             if (searchTerm === '') {
                 displayCharacters(allCharacters);
-                return;
+            } else {
+                const filtered = allCharacters.filter(char => char.name.toLowerCase().includes(searchTerm));
+                displayCharacters(filtered);
             }
-            
-            const filtered = allCharacters.filter(char => char.name.toLowerCase().includes(searchTerm));
-            displayCharacters(filtered);
+            // Relancer les animations de grille après filtrage
+            setTimeout(() => startGridCarousels(), 600);
         });
 
         // Recherche page Classement
@@ -4609,6 +4688,11 @@
                 
                 displayCharacters(allCharacters);
                 displayWeaponsShowcase();
+
+                // Détecter les personnages avec plusieurs cartes (en arrière-plan)
+                preloadMultiCards(allCharacters).then(() => {
+                    startGridCarousels();
+                });
                 
                 console.log(`✅ ${allCharacters.length} personnages chargés`);
                 console.log(`✅ Armes chargées pour ${Object.keys(weaponsData).length} raretés`);
