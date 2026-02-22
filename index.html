@@ -370,38 +370,6 @@
             background: #2ecc71;
         }
 
-        /* Placeholder carte non créée dans le détail */
-        .no-card-placeholder {
-            width: 300px;
-            height: 400px;
-            border-radius: 10px;
-            border: 3px dashed rgba(255,255,255,0.2);
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            gap: 12px;
-            flex-shrink: 0;
-            background: rgba(255,255,255,0.03);
-        }
-
-        .no-card-placeholder.alliance { border-color: rgba(52,152,219,0.35); }
-        .no-card-placeholder.rebellion { border-color: rgba(231,76,60,0.35); }
-        .no-card-placeholder.trefonds { border-color: rgba(46,204,113,0.35); }
-
-        .no-card-placeholder-icon {
-            font-size: 4em;
-            font-family: 'Bebas Neue', sans-serif;
-            color: rgba(255,255,255,0.15);
-        }
-
-        .no-card-placeholder-label {
-            font-size: 0.9em;
-            color: rgba(255,255,255,0.3);
-            letter-spacing: 1px;
-            text-transform: uppercase;
-        }
-
         .no-card-section {
             margin-top: 50px;
             margin-bottom: 40px;
@@ -4363,13 +4331,18 @@
                 }
             }
             
-            const cardSection = character.hasCard
-                ? `<div id="cardCarousel" class="card-carousel">
-                        <img src="./cards/${character.name}.png" alt="${character.name}" class="card-image ${character.factionClass}" id="carouselMainImg" onclick="openLightbox('./cards/${character.name}.png')">
-                   </div>`
-                : `<div class="no-card-placeholder ${character.factionClass}">
-                        <div class="no-card-placeholder-icon">?</div>
-                        <div class="no-card-placeholder-label">Carte non créée</div>
+            // Image de faction par défaut pour les personnages sans carte
+            const factionCardMap = {
+                'alliance': './cards/Alliance.png',
+                'rebellion': './cards/Rebellion.png',
+                'trefonds': './cards/Trefonds.png'
+            };
+            const cardSrc = character.hasCard
+                ? `./cards/${character.name}.png`
+                : (factionCardMap[character.factionClass] || './cards/dos.png');
+
+            const cardSection = `<div id="cardCarousel" class="card-carousel">
+                        <img src="${cardSrc}" alt="${character.name}" class="card-image ${character.factionClass}" id="carouselMainImg" onclick="openLightbox('${cardSrc}')">
                    </div>`;
 
             detailDiv.innerHTML = `
@@ -4813,7 +4786,7 @@
                 html += `
                     <div class="ranking-row ${rowClass}" onclick="changePage('personnages'); setTimeout(() => showCharacterDetail('${char.name}'), 100)">
                         <div class="rank-position ${positionClass}">#${position}</div>
-                        <img src="./cards/${char.name}.png" alt="${char.name}" class="player-avatar ${char.factionClass}" onerror="this.src='data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 60 80%22%3E%3Crect fill=%22%23333%22 width=%2260%22 height=%2280%22/%3E%3C/svg%3E'">
+                        <img src="${char.hasCard ? `./cards/${char.name}.png` : ({'alliance':'./cards/Alliance.png','rebellion':'./cards/Rebellion.png','trefonds':'./cards/Trefonds.png'}[char.factionClass] || './cards/dos.png')}" alt="${char.name}" class="player-avatar ${char.factionClass}" onerror="this.src='data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 60 80%22%3E%3Crect fill=%22%23333%22 width=%2260%22 height=%2280%22/%3E%3C/svg%3E'">
                         <div class="player-info">
                             <div class="player-name-container">
                                 <span class="player-name ${nameClass}">${char.name}</span>
