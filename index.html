@@ -370,6 +370,112 @@
             background: #2ecc71;
         }
 
+        /* Placeholder carte non créée dans le détail */
+        .no-card-placeholder {
+            width: 300px;
+            height: 400px;
+            border-radius: 10px;
+            border: 3px dashed rgba(255,255,255,0.2);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            flex-shrink: 0;
+            background: rgba(255,255,255,0.03);
+        }
+
+        .no-card-placeholder.alliance { border-color: rgba(52,152,219,0.35); }
+        .no-card-placeholder.rebellion { border-color: rgba(231,76,60,0.35); }
+        .no-card-placeholder.trefonds { border-color: rgba(46,204,113,0.35); }
+
+        .no-card-placeholder-icon {
+            font-size: 4em;
+            font-family: 'Bebas Neue', sans-serif;
+            color: rgba(255,255,255,0.15);
+        }
+
+        .no-card-placeholder-label {
+            font-size: 0.9em;
+            color: rgba(255,255,255,0.3);
+            letter-spacing: 1px;
+            text-transform: uppercase;
+        }
+
+        .no-card-section {
+            margin-top: 50px;
+            margin-bottom: 40px;
+        }
+
+        .no-card-title {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 1.5em;
+            color: rgba(255,255,255,0.45);
+            margin-bottom: 16px;
+            font-family: 'Bebas Neue', 'Arial Black', sans-serif;
+            letter-spacing: 1px;
+        }
+
+        .no-card-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+            gap: 8px;
+        }
+
+        .no-card-row {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            background: rgba(255,255,255,0.04);
+            border: 1px solid rgba(255,255,255,0.07);
+            border-radius: 10px;
+            padding: 10px 14px;
+            cursor: pointer;
+            transition: background 0.2s ease;
+        }
+
+        .no-card-row:hover {
+            background: rgba(255,255,255,0.09);
+        }
+
+        .no-card-row.alliance { border-left: 3px solid #3498db; }
+        .no-card-row.rebellion { border-left: 3px solid #e74c3c; }
+        .no-card-row.trefonds { border-left: 3px solid #2ecc71; }
+
+        .no-card-info {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+            min-width: 0;
+        }
+
+        .no-card-name {
+            font-family: 'Bebas Neue', 'Arial Black', sans-serif;
+            font-size: 1.05em;
+            letter-spacing: 0.5px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .no-card-meta {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.82em;
+            color: #999;
+        }
+
+        .no-card-rank {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            flex-shrink: 0;
+        }
+
         .character-detail {
             display: none;
             background: rgba(255, 255, 255, 0.05);
@@ -3958,28 +4064,30 @@
                 const data = await loadINI(faction.file);
                 
                 for (const [name, stats] of Object.entries(data)) {
-                    // Vérifier si la carte est créée
-                    if (stats['zz CreationCarte'] === 'Faite') {
-                        characters.push({
-                            name: name,
-                            faction: faction.name,
-                            factionClass: faction.class,
-                            niveau: parseInt(stats.Niveau) || 0,
-                            attaque: parseInt(stats.Attaque) || 0,
-                            defense: parseInt(stats.Defense) || 0,
-                            strategie: parseInt(stats.Strategie) || 0,
-                            vitesse: parseInt(stats.Vitesse) || 0,
-                            pv: parseInt(stats.PV) || 0,
-                            rang: stats.Rang || 'Non classé',
-                            titreAffiche: stats.TitreAffiche && stats.TitreAffiche !== '0.000000' ? stats.TitreAffiche : 'Sans titre',
-                            xp: parseInt(stats.XP) || 0,
-                            pointsTotaux: parseInt(stats.PointsTotaux) || 0,
-                            mmr: parseInt(stats.MMR) || 0,
-                            armeAffiche: stats.ArmeAffiche && stats.ArmeAffiche !== '0.000000' ? stats.ArmeAffiche : '',
-                            description: stats['zz Carte'] && stats['zz Carte'] !== '0.000000' ? stats['zz Carte'] : 'Aucune description',
-                            illustration: (stats['Illustration'] || stats['illustration'] || stats['ILLUSTRATION'] || '')
-                        });
-                    }
+                    // Ignorer les entrées sans niveau (pas de vrai personnage)
+                    if (!stats.Niveau) continue;
+
+                    const hasCard = stats['zz CreationCarte'] === 'Faite';
+                    characters.push({
+                        name: name,
+                        faction: faction.name,
+                        factionClass: faction.class,
+                        hasCard: hasCard,
+                        niveau: parseInt(stats.Niveau) || 0,
+                        attaque: parseInt(stats.Attaque) || 0,
+                        defense: parseInt(stats.Defense) || 0,
+                        strategie: parseInt(stats.Strategie) || 0,
+                        vitesse: parseInt(stats.Vitesse) || 0,
+                        pv: parseInt(stats.PV) || 0,
+                        rang: stats.Rang || 'Non classé',
+                        titreAffiche: stats.TitreAffiche && stats.TitreAffiche !== '0.000000' ? stats.TitreAffiche : 'Sans titre',
+                        xp: parseInt(stats.XP) || 0,
+                        pointsTotaux: parseInt(stats.PointsTotaux) || 0,
+                        mmr: parseInt(stats.MMR) || 0,
+                        armeAffiche: stats.ArmeAffiche && stats.ArmeAffiche !== '0.000000' ? stats.ArmeAffiche : '',
+                        description: stats['zz Carte'] && stats['zz Carte'] !== '0.000000' ? stats['zz Carte'] : 'Aucune description',
+                        illustration: (stats['Illustration'] || stats['illustration'] || stats['ILLUSTRATION'] || '')
+                    });
                 }
             }
 
@@ -4080,40 +4188,88 @@
             }
         }
 
-        // Afficher la grille de personnages
+        // Afficher la grille de personnages + liste sans carte
         function displayCharacters(characters) {
             const grid = document.getElementById('characterGrid');
             const noResults = document.getElementById('noResults');
-            
+            let noCardList = document.getElementById('noCardList');
+
+            // Créer le conteneur de liste si absent
+            if (!noCardList) {
+                noCardList = document.createElement('div');
+                noCardList.id = 'noCardList';
+                grid.parentNode.insertBefore(noCardList, grid.nextSibling);
+            }
+
+            const withCard = characters.filter(c => c.hasCard);
+            const noCard   = characters.filter(c => !c.hasCard);
+
             if (characters.length === 0) {
                 grid.style.display = 'none';
+                noCardList.innerHTML = '';
                 noResults.style.display = 'block';
                 return;
             }
-            
-            grid.style.display = 'grid';
+
             noResults.style.display = 'none';
-            
-            grid.innerHTML = characters.map((char, index) => `
-                <div class="character-card ${char.factionClass}" onclick="showCharacterDetail('${char.name}')" data-index="${index}">
-                    <div class="character-card-inner">
-                        <div class="character-card-front">
-                            <img src="./cards/${char.name}.png" alt="${char.name}" class="character-card-bg" onerror="this.src='data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 300 400%22%3E%3Crect fill=%22%23333%22 width=%22300%22 height=%22400%22/%3E%3C/svg%3E'">
-                            <div class="character-card-content">
-                                <div class="faction-badge ${char.factionClass}">${char.faction}</div>
-                                <h3>${char.name}</h3>
-                                <div class="character-card-info"><span class="${getLevelClass(char.niveau)}">Niveau ${char.niveau}</span> • ${char.rang}</div>
+
+            // --- Grille des cartes ---
+            if (withCard.length === 0) {
+                grid.style.display = 'none';
+            } else {
+                grid.style.display = 'grid';
+                grid.innerHTML = withCard.map((char, index) => `
+                    <div class="character-card ${char.factionClass}" onclick="showCharacterDetail('${char.name}')" data-index="${index}">
+                        <div class="character-card-inner">
+                            <div class="character-card-front">
+                                <img src="./cards/${char.name}.png" alt="${char.name}" class="character-card-bg" onerror="this.src='data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 300 400%22%3E%3Crect fill=%22%23333%22 width=%22300%22 height=%22400%22/%3E%3C/svg%3E'">
+                                <div class="character-card-content">
+                                    <div class="faction-badge ${char.factionClass}">${char.faction}</div>
+                                    <h3>${char.name}</h3>
+                                    <div class="character-card-info"><span class="${getLevelClass(char.niveau)}">Niveau ${char.niveau}</span> • ${char.rang}</div>
+                                </div>
+                            </div>
+                            <div class="character-card-back">
+                                <img src="./cards/dos.png" alt="Dos de carte">
                             </div>
                         </div>
-                        <div class="character-card-back">
-                            <img src="./cards/dos.png" alt="Dos de carte">
+                    </div>
+                `).join('');
+                revealCardsSequentially();
+            }
+
+            // --- Liste des personnages sans carte ---
+            if (noCard.length === 0) {
+                noCardList.innerHTML = '';
+            } else {
+                noCardList.innerHTML = `
+                    <div class="no-card-section">
+                        <h3 class="no-card-title">
+                            <img src="./icons/classement.png" alt="" class="section-icon"> Autres joueurs (${noCard.length})
+                        </h3>
+                        <div class="no-card-grid">
+                            ${noCard.map(char => {
+                                const rankIcon = rankIcons[char.rang] || '';
+                                return `
+                                <div class="no-card-row ${char.factionClass}" onclick="showCharacterDetail('${char.name}')">
+                                    <div class="no-card-faction-bar"></div>
+                                    <div class="no-card-info">
+                                        <span class="no-card-name">${char.name}</span>
+                                        <span class="no-card-meta">
+                                            <span class="faction-badge ${char.factionClass}" style="font-size:0.7em;padding:2px 8px;">${char.faction}</span>
+                                            <span class="${getLevelClass(char.niveau)}">Niv. ${char.niveau}</span>
+                                        </span>
+                                    </div>
+                                    <div class="no-card-rank">
+                                        ${rankIcon ? `<img src="${rankIcon}" style="width:22px;height:22px;object-fit:contain;">` : ''}
+                                        <span class="${getRankClass(char.rang)}" style="font-size:0.85em;">${char.rang}</span>
+                                    </div>
+                                </div>`;
+                            }).join('')}
                         </div>
                     </div>
-                </div>
-            `).join('');
-            
-            // Animation de retournement séquentiel
-            revealCardsSequentially();
+                `;
+            }
         }
 
         // Animation de retournement des cartes une par une
@@ -4207,12 +4363,19 @@
                 }
             }
             
+            const cardSection = character.hasCard
+                ? `<div id="cardCarousel" class="card-carousel">
+                        <img src="./cards/${character.name}.png" alt="${character.name}" class="card-image ${character.factionClass}" id="carouselMainImg" onclick="openLightbox('./cards/${character.name}.png')">
+                   </div>`
+                : `<div class="no-card-placeholder ${character.factionClass}">
+                        <div class="no-card-placeholder-icon">?</div>
+                        <div class="no-card-placeholder-label">Carte non créée</div>
+                   </div>`;
+
             detailDiv.innerHTML = `
                 <button class="close-detail-btn" onclick="closeCharacterDetail()">×</button>
                 <div class="detail-header">
-                    <div id="cardCarousel" class="card-carousel">
-                        <img src="./cards/${character.name}.png" alt="${character.name}" class="card-image ${character.factionClass}" id="carouselMainImg" onclick="openLightbox('./cards/${character.name}.png')">
-                    </div>
+                    ${cardSection}
                     <div class="detail-info">
                         <div class="faction-badge ${character.factionClass}">${character.faction}</div>
                         <h2>${character.name}</h2>
@@ -4292,8 +4455,8 @@
                 weaponsGrid.innerHTML = '<p style="color: #888; text-align: center; padding: 20px;">Aucune arme débloquée</p>';
             }
 
-            // Initialiser le carousel de cartes
-            setupCardCarousel(character);
+            // Initialiser le carousel de cartes (seulement si carte créée)
+            if (character.hasCard) setupCardCarousel(character);
 
             detailDiv.scrollIntoView({ behavior: 'smooth', block: 'start' });
         }
