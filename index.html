@@ -2717,9 +2717,21 @@
                 height: 100%;
             }
 
-            /* Cacher le caret sur mobile (plus de place avec l'icône au-dessus du texte) */
+            /* Caret positionné en absolu pour ne pas allonger le bouton verticalement.
+               Reste proche du bord droit et du texte du bas. */
             .dropdown-wrapper .nav-btn .dropdown-caret {
-                display: none;
+                display: inline-block;
+                position: absolute;
+                right: 4px;
+                bottom: 6px;
+                margin: 0;
+                font-size: 0.9em;
+                line-height: 1;
+                opacity: 0.65;
+            }
+
+            .dropdown-wrapper.open .nav-btn .dropdown-caret {
+                opacity: 1;
             }
 
             /* Dropdown ancré à gauche du viewport pour ne pas déborder */
@@ -3573,7 +3585,7 @@
         /* Grille 6 colonnes desktop */
         .edition-grid {
             display: grid;
-            grid-template-columns: repeat(6, 1fr);
+            grid-template-columns: repeat(6, minmax(0, 1fr));
             gap: 14px;
             margin-bottom: 50px;
         }
@@ -3766,7 +3778,7 @@
         /* ============ TABLETTE ============ */
         @media (max-width: 1024px) {
             .edition-grid {
-                grid-template-columns: repeat(4, 1fr);
+                grid-template-columns: repeat(4, minmax(0, 1fr));
                 gap: 12px;
             }
         }
@@ -3774,7 +3786,7 @@
         /* ============ MOBILE ============ */
         @media (max-width: 768px) {
             .edition-grid {
-                grid-template-columns: repeat(3, 1fr);
+                grid-template-columns: repeat(3, minmax(0, 1fr));
                 gap: 8px;
             }
 
