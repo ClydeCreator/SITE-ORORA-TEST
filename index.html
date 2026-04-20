@@ -3379,6 +3379,446 @@
                 padding: 1px 4px;
             }
         }
+
+        /* ============================================ */
+        /* =========== DROPDOWN MENU "CARTES" ========= */
+        /* ============================================ */
+        .dropdown-wrapper {
+            position: relative;
+        }
+
+        .dropdown-wrapper .nav-btn .dropdown-caret {
+            font-size: 0.7em;
+            margin-left: 2px;
+            opacity: 0.8;
+            transition: transform 0.25s ease;
+            display: inline-block;
+        }
+
+        .dropdown-wrapper.open .nav-btn .dropdown-caret {
+            transform: rotate(180deg);
+        }
+
+        .dropdown-menu {
+            position: absolute;
+            top: calc(100% + 8px);
+            left: 50%;
+            transform: translateX(-50%) translateY(-6px);
+            background: rgba(20, 20, 35, 0.98);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            border-radius: 14px;
+            padding: 6px;
+            min-width: 180px;
+            box-shadow: 0 12px 35px rgba(0, 0, 0, 0.6), 0 0 20px rgba(138, 43, 226, 0.15);
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.22s ease, transform 0.22s ease, visibility 0.22s;
+            z-index: 500;
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+        }
+
+        .dropdown-wrapper.open .dropdown-menu {
+            opacity: 1;
+            visibility: visible;
+            transform: translateX(-50%) translateY(0);
+        }
+
+        .dropdown-item {
+            display: block;
+            width: 100%;
+            padding: 11px 18px;
+            background: transparent;
+            border: none;
+            color: rgba(255, 255, 255, 0.85);
+            font-family: 'Bebas Neue', 'Arial Black', sans-serif;
+            font-size: 1.05em;
+            letter-spacing: 1px;
+            text-align: left;
+            border-radius: 9px;
+            cursor: pointer;
+            transition: background 0.2s ease, color 0.2s ease;
+        }
+
+        .dropdown-item:hover {
+            background: rgba(255, 255, 255, 0.08);
+            color: #fff;
+        }
+
+        .dropdown-item.active {
+            background: rgba(138, 43, 226, 0.25);
+            color: #fff;
+        }
+
+        /* ============================================ */
+        /* ============ PAGE "ÉDITION 1" ============== */
+        /* ============================================ */
+        .edition-header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .edition-title {
+            font-size: 2.4em;
+            margin-bottom: 8px;
+            background: linear-gradient(135deg, #fff 0%, #b8a2ff 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .edition-subtitle {
+            color: rgba(255, 255, 255, 0.6);
+            font-size: 1em;
+            margin-bottom: 18px;
+        }
+
+        .edition-progress {
+            display: inline-flex;
+            align-items: center;
+            gap: 14px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 10px 22px;
+            border-radius: 30px;
+            font-family: 'Bebas Neue', sans-serif;
+            letter-spacing: 1.5px;
+        }
+
+        .edition-progress-count {
+            font-size: 1.5em;
+            color: #2ecc71;
+        }
+
+        .edition-progress-total {
+            font-size: 1.2em;
+            color: rgba(255, 255, 255, 0.6);
+        }
+
+        .edition-progress-bar {
+            width: 160px;
+            height: 6px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 3px;
+            overflow: hidden;
+        }
+
+        .edition-progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #2ecc71, #27ae60);
+            width: 0%;
+            transition: width 0.6s ease;
+            box-shadow: 0 0 10px rgba(46, 204, 113, 0.6);
+        }
+
+        .edition-reset-btn {
+            display: inline-block;
+            margin-left: 10px;
+            padding: 6px 14px;
+            background: transparent;
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            border-radius: 18px;
+            color: rgba(255, 255, 255, 0.6);
+            font-family: 'Poppins', sans-serif;
+            font-size: 0.75em;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .edition-reset-btn:hover {
+            background: rgba(231, 76, 60, 0.15);
+            color: #fff;
+            border-color: rgba(231, 76, 60, 0.4);
+        }
+
+        .edition-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 25px;
+            margin-bottom: 50px;
+            perspective: 1200px;
+        }
+
+        .edition-card {
+            position: relative;
+            aspect-ratio: 2.5 / 3.5;
+            border-radius: 14px;
+            cursor: pointer;
+            transform-style: preserve-3d;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+            overflow: hidden;
+            /* Anti-téléchargement */
+            -webkit-user-select: none;
+            -moz-user-select: none;
+            -ms-user-select: none;
+            user-select: none;
+            -webkit-user-drag: none;
+            -webkit-touch-callout: none;
+        }
+
+        .edition-card:hover {
+            box-shadow: 0 20px 45px rgba(0, 0, 0, 0.7), 0 0 25px rgba(138, 43, 226, 0.25);
+        }
+
+        /* Image rognée de ~5mm (≈6% sur chaque côté) via background-size */
+        .edition-card-image {
+            position: absolute;
+            inset: 0;
+            border-radius: 14px;
+            background-size: 112% 112%;
+            background-position: center;
+            background-repeat: no-repeat;
+            pointer-events: none;
+        }
+
+        /* Bordure interne subtile */
+        .edition-card::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            border-radius: 14px;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            pointer-events: none;
+            z-index: 3;
+        }
+
+        /* ======== EFFET HOLOGRAPHIQUE (cartes 50-92) ======== */
+        .edition-card.holographic .edition-holo-shine {
+            position: absolute;
+            inset: 0;
+            border-radius: 14px;
+            pointer-events: none;
+            background: linear-gradient(
+                var(--shine-angle, 135deg),
+                transparent 0%,
+                rgba(255, 0, 150, 0.28) 18%,
+                rgba(0, 220, 255, 0.28) 35%,
+                rgba(255, 240, 0, 0.28) 50%,
+                rgba(0, 255, 160, 0.28) 65%,
+                rgba(160, 80, 255, 0.28) 82%,
+                transparent 100%
+            );
+            mix-blend-mode: color-dodge;
+            opacity: 0.55;
+            z-index: 2;
+            animation: holoShift 5s linear infinite;
+        }
+
+        .edition-card.holographic .edition-holo-overlay {
+            position: absolute;
+            inset: 0;
+            border-radius: 14px;
+            pointer-events: none;
+            background: linear-gradient(
+                125deg,
+                transparent 0%,
+                transparent 25%,
+                rgba(255, 255, 255, 0.18) 30%,
+                rgba(255, 255, 255, 0.35) 40%,
+                rgba(255, 255, 255, 0.18) 50%,
+                transparent 55%,
+                transparent 100%
+            );
+            background-size: 250% 250%;
+            background-position: var(--mouse-x, 50%) var(--mouse-y, 50%);
+            mix-blend-mode: overlay;
+            opacity: 0.7;
+            z-index: 2;
+        }
+
+        .edition-card.holographic:hover .edition-holo-shine {
+            opacity: 0.85;
+        }
+
+        .edition-card.holographic:hover .edition-holo-overlay {
+            opacity: 1;
+        }
+
+        /* Reflet lumineux qui suit la souris (toutes les cartes) */
+        .edition-light {
+            position: absolute;
+            inset: 0;
+            border-radius: 14px;
+            pointer-events: none;
+            background: radial-gradient(
+                circle at var(--mouse-x, 50%) var(--mouse-y, 50%),
+                rgba(255, 255, 255, 0.25) 0%,
+                rgba(255, 255, 255, 0.08) 20%,
+                transparent 55%
+            );
+            mix-blend-mode: overlay;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            z-index: 2;
+        }
+
+        .edition-card:hover .edition-light {
+            opacity: 1;
+        }
+
+        @keyframes holoShift {
+            0%   { --shine-angle: 120deg; background-position: 0% 50%; }
+            50%  { --shine-angle: 160deg; background-position: 100% 50%; }
+            100% { --shine-angle: 120deg; background-position: 0% 50%; }
+        }
+
+        /* Fallback : navigateurs qui ne supportent pas l'animation de variables CSS */
+        @property --shine-angle {
+            syntax: '<angle>';
+            inherits: false;
+            initial-value: 135deg;
+        }
+
+        /* ======== ÉTAT "VALIDÉ / COLLECTÉ" ======== */
+        .edition-card.collected {
+            box-shadow: 0 10px 30px rgba(46, 204, 113, 0.45), 0 0 0 3px rgba(46, 204, 113, 0.7);
+        }
+
+        .edition-card.collected::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            border-radius: 14px;
+            background: radial-gradient(circle at 50% 40%, rgba(46, 204, 113, 0.18), transparent 70%);
+            pointer-events: none;
+            z-index: 4;
+        }
+
+        .edition-check {
+            position: absolute;
+            top: 8px;
+            right: 8px;
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #27ae60, #2ecc71);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 4px 12px rgba(46, 204, 113, 0.6);
+            transform: scale(0);
+            opacity: 0;
+            transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.3s ease;
+            z-index: 5;
+        }
+
+        .edition-check svg {
+            width: 18px;
+            height: 18px;
+            stroke: #fff;
+            stroke-width: 3;
+            fill: none;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+        }
+
+        .edition-card.collected .edition-check {
+            transform: scale(1);
+            opacity: 1;
+        }
+
+        /* Animation de validation au clic */
+        @keyframes validatePulse {
+            0%   { transform: scale(1); }
+            35%  { transform: scale(1.08); box-shadow: 0 0 0 0 rgba(46, 204, 113, 0.9), 0 10px 30px rgba(46, 204, 113, 0.6); }
+            100% { transform: scale(1); box-shadow: 0 0 0 25px rgba(46, 204, 113, 0), 0 10px 30px rgba(0, 0, 0, 0.5); }
+        }
+
+        .edition-card.validating {
+            animation: validatePulse 0.55s ease-out;
+        }
+
+        /* Le numéro de la carte (petit badge discret) */
+        .edition-card-number {
+            position: absolute;
+            bottom: 8px;
+            left: 8px;
+            background: rgba(0, 0, 0, 0.55);
+            color: rgba(255, 255, 255, 0.9);
+            font-family: 'Bebas Neue', sans-serif;
+            font-size: 0.85em;
+            letter-spacing: 1px;
+            padding: 2px 8px;
+            border-radius: 10px;
+            z-index: 5;
+            pointer-events: none;
+            backdrop-filter: blur(4px);
+            -webkit-backdrop-filter: blur(4px);
+        }
+
+        /* ============ MOBILE ============ */
+        @media (max-width: 768px) {
+            .edition-grid {
+                gap: 10px;
+            }
+
+            .edition-title {
+                font-size: 1.6em;
+            }
+
+            .edition-subtitle {
+                font-size: 0.85em;
+            }
+
+            .edition-progress {
+                padding: 8px 16px;
+                gap: 10px;
+                flex-wrap: wrap;
+                justify-content: center;
+            }
+
+            .edition-progress-bar {
+                width: 100px;
+            }
+
+            .edition-reset-btn {
+                margin-left: 0;
+                font-size: 0.7em;
+            }
+
+            .edition-card {
+                border-radius: 10px;
+            }
+
+            .edition-card-image,
+            .edition-card::before,
+            .edition-card.holographic .edition-holo-shine,
+            .edition-card.holographic .edition-holo-overlay,
+            .edition-light,
+            .edition-card.collected::after {
+                border-radius: 10px;
+            }
+
+            .edition-check {
+                width: 24px;
+                height: 24px;
+                top: 5px;
+                right: 5px;
+            }
+
+            .edition-check svg {
+                width: 13px;
+                height: 13px;
+            }
+
+            .edition-card-number {
+                font-size: 0.7em;
+                padding: 1px 6px;
+                bottom: 5px;
+                left: 5px;
+            }
+
+            .dropdown-menu {
+                min-width: 160px;
+                padding: 4px;
+            }
+
+            .dropdown-item {
+                padding: 10px 14px;
+                font-size: 0.95em;
+            }
+        }
     </style>
 </head>
 <body>
@@ -3392,19 +3832,30 @@
                 <img src="./logo.png" alt="Orora" class="logo">
                 
                 <nav class="nav-menu">
-                    <button class="nav-btn active" onclick="changePage('personnages')">
-                        <img src="./icons/personnages.png" alt="" class="nav-icon">
-                        <span class="menu-text">Cartes</span>
-                    </button>
-                    <button class="nav-btn" onclick="changePage('classement')">
+                    <div class="dropdown-wrapper" id="cartesDropdown">
+                        <button class="nav-btn active" data-page="cartes" onclick="toggleCartesDropdown(event)">
+                            <img src="./icons/personnages.png" alt="" class="nav-icon">
+                            <span class="menu-text">Cartes</span>
+                            <span class="dropdown-caret">▾</span>
+                        </button>
+                        <div class="dropdown-menu" role="menu">
+                            <button class="dropdown-item active" data-subpage="personnages" onclick="changePage('personnages')" role="menuitem">
+                                Personnages
+                            </button>
+                            <button class="dropdown-item" data-subpage="edition1" onclick="changePage('edition1')" role="menuitem">
+                                Édition 1
+                            </button>
+                        </div>
+                    </div>
+                    <button class="nav-btn" data-page="classement" onclick="changePage('classement')">
                         <img src="./icons/classement.png" alt="" class="nav-icon">
                         <span class="menu-text">Classement</span>
                     </button>
-                    <button class="nav-btn" onclick="changePage('lore')">
+                    <button class="nav-btn" data-page="lore" onclick="changePage('lore')">
                         <img src="./icons/lore.png" alt="" class="nav-icon">
                         <span class="menu-text">Le Jeu</span>
                     </button>
-                    <button class="nav-btn" onclick="changePage('projet')">
+                    <button class="nav-btn" data-page="projet" onclick="changePage('projet')">
                         <img src="./icons/informations.png" alt="" class="nav-icon">
                         <span class="menu-text">Le Projet</span>
                     </button>
@@ -3439,6 +3890,24 @@
                 <div id="noResults" class="no-results" style="display: none;">
                     Aucun personnage trouvé
                 </div>
+            </div>
+
+            <!-- PAGE ÉDITION 1 -->
+            <div id="page-edition1" class="page">
+                <div class="edition-header">
+                    <h2 class="edition-title">Édition 1</h2>
+                    <p class="edition-subtitle">Clique sur une carte pour l'ajouter à ta collection</p>
+                    <div class="edition-progress">
+                        <span>
+                            <span id="editionCount" class="edition-progress-count">0</span><span class="edition-progress-total"> / 92</span>
+                        </span>
+                        <div class="edition-progress-bar">
+                            <div id="editionProgressFill" class="edition-progress-fill"></div>
+                        </div>
+                        <button class="edition-reset-btn" onclick="resetEditionCollection()" title="Réinitialiser la collection">Réinitialiser</button>
+                    </div>
+                </div>
+                <div id="editionGrid" class="edition-grid"></div>
             </div>
 
             <!-- PAGE CLASSEMENT -->
@@ -3881,16 +4350,33 @@
                 page.classList.remove('active');
             });
             
-            // Désactiver tous les boutons
+            // Désactiver tous les boutons de la barre principale
             document.querySelectorAll('.nav-btn').forEach(btn => {
                 btn.classList.remove('active');
             });
+
+            // Désactiver tous les items du dropdown
+            document.querySelectorAll('.dropdown-item').forEach(item => {
+                item.classList.remove('active');
+            });
             
             // Afficher la page sélectionnée
-            document.getElementById(`page-${pageName}`).classList.add('active');
+            const pageEl = document.getElementById(`page-${pageName}`);
+            if (pageEl) pageEl.classList.add('active');
             
-            // Activer le bouton correspondant
-            event.target.classList.add('active');
+            // Activer le bon bouton de nav (via data-page)
+            // Les sous-pages "personnages" et "edition1" activent le bouton "Cartes"
+            const topBtnKey = (pageName === 'personnages' || pageName === 'edition1') ? 'cartes' : pageName;
+            const navBtn = document.querySelector(`.nav-btn[data-page="${topBtnKey}"]`);
+            if (navBtn) navBtn.classList.add('active');
+
+            // Activer l'item de dropdown correspondant
+            const subItem = document.querySelector(`.dropdown-item[data-subpage="${pageName}"]`);
+            if (subItem) subItem.classList.add('active');
+
+            // Fermer le dropdown quand on change de page
+            const dd = document.getElementById('cartesDropdown');
+            if (dd) dd.classList.remove('open');
             
             // Fermer les détails de personnage si ouverts
             if (pageName !== 'personnages') {
@@ -3906,7 +4392,36 @@
             if (pageName === 'lore') {
                 resetBook();
             }
+
+            // Si on va sur la page Édition 1, initialiser la grille (une seule fois)
+            if (pageName === 'edition1') {
+                initEditionGrid();
+            }
         }
+
+        // ========== DROPDOWN "CARTES" ==========
+        function toggleCartesDropdown(event) {
+            event.stopPropagation();
+            const dd = document.getElementById('cartesDropdown');
+            dd.classList.toggle('open');
+        }
+
+        // Fermer le dropdown si on clique ailleurs
+        document.addEventListener('click', function(e) {
+            const dd = document.getElementById('cartesDropdown');
+            if (!dd) return;
+            if (!dd.contains(e.target)) {
+                dd.classList.remove('open');
+            }
+        });
+
+        // Fermer avec la touche Echap
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') {
+                const dd = document.getElementById('cartesDropdown');
+                if (dd) dd.classList.remove('open');
+            }
+        });
 
         // LIVRE INTERACTIF - LORE
         let currentBookPage = 1;
@@ -4937,6 +5452,197 @@
 
             container.innerHTML = html;
         }
+
+        // ============================================
+        // =============== ÉDITION 1 ==================
+        // ============================================
+        const EDITION_TOTAL = 92;
+        const EDITION_HOLO_FROM = 50; // Cartes holographiques à partir de la 50
+        const EDITION_STORAGE_KEY = 'orora_edition1_collection';
+        const EDITION_FOLDER = './Édition 1';
+        let editionGridBuilt = false;
+        let editionCollected = new Set();
+
+        // Charger la collection depuis localStorage
+        function loadEditionCollection() {
+            try {
+                const stored = localStorage.getItem(EDITION_STORAGE_KEY);
+                if (stored) {
+                    const arr = JSON.parse(stored);
+                    if (Array.isArray(arr)) {
+                        editionCollected = new Set(arr.filter(n => Number.isInteger(n) && n >= 1 && n <= EDITION_TOTAL));
+                    }
+                }
+            } catch (e) {
+                console.warn('Impossible de charger la collection :', e);
+                editionCollected = new Set();
+            }
+        }
+
+        // Sauvegarder la collection
+        function saveEditionCollection() {
+            try {
+                localStorage.setItem(EDITION_STORAGE_KEY, JSON.stringify([...editionCollected]));
+            } catch (e) {
+                console.warn('Impossible de sauvegarder la collection :', e);
+            }
+        }
+
+        // Mettre à jour le compteur et la barre de progression
+        function updateEditionProgress() {
+            const count = editionCollected.size;
+            const countEl = document.getElementById('editionCount');
+            const fillEl = document.getElementById('editionProgressFill');
+            if (countEl) countEl.textContent = count;
+            if (fillEl) fillEl.style.width = `${(count / EDITION_TOTAL) * 100}%`;
+        }
+
+        // Construire la grille (une seule fois)
+        function initEditionGrid() {
+            if (editionGridBuilt) return;
+            editionGridBuilt = true;
+
+            loadEditionCollection();
+
+            const grid = document.getElementById('editionGrid');
+            if (!grid) return;
+
+            // Désactiver le menu contextuel sur toute la grille
+            grid.addEventListener('contextmenu', e => e.preventDefault());
+
+            let html = '';
+            for (let i = 1; i <= EDITION_TOTAL; i++) {
+                const isHolo = i >= EDITION_HOLO_FROM;
+                const isCollected = editionCollected.has(i);
+                // Encoder le chemin pour gérer le caractère É et l'espace
+                const imgPath = `${EDITION_FOLDER}/${i}.png`.replace(/ /g, '%20');
+                html += `
+                    <div class="edition-card${isHolo ? ' holographic' : ''}${isCollected ? ' collected' : ''}"
+                         data-card="${i}"
+                         draggable="false"
+                         oncontextmenu="return false">
+                        <div class="edition-card-image" style="background-image: url('${imgPath}');"></div>
+                        ${isHolo ? '<div class="edition-holo-shine"></div><div class="edition-holo-overlay"></div>' : ''}
+                        <div class="edition-light"></div>
+                        <div class="edition-check" aria-label="Collectée">
+                            <svg viewBox="0 0 24 24"><polyline points="5 13 10 18 20 7"></polyline></svg>
+                        </div>
+                        <div class="edition-card-number">${String(i).padStart(2, '0')}</div>
+                    </div>
+                `;
+            }
+            grid.innerHTML = html;
+
+            updateEditionProgress();
+            attachEditionCardEvents();
+        }
+
+        // Attacher les événements 3D + clic sur chaque carte
+        function attachEditionCardEvents() {
+            const cards = document.querySelectorAll('.edition-card');
+            cards.forEach(card => {
+                // Tilt 3D au mouvement
+                card.addEventListener('mousemove', handleEditionCardMove);
+                card.addEventListener('mouseleave', handleEditionCardLeave);
+
+                // Touch mobile : tilt léger
+                card.addEventListener('touchmove', handleEditionCardMove, { passive: true });
+                card.addEventListener('touchend', handleEditionCardLeave);
+
+                // Clic = toggle collection
+                card.addEventListener('click', function(e) {
+                    const cardNum = parseInt(this.dataset.card, 10);
+                    toggleEditionCard(cardNum, this);
+                });
+
+                // Bloquer le drag de l'image
+                card.addEventListener('dragstart', e => e.preventDefault());
+            });
+        }
+
+        function handleEditionCardMove(e) {
+            const card = e.currentTarget;
+            const rect = card.getBoundingClientRect();
+            const centerX = rect.left + rect.width / 2;
+            const centerY = rect.top + rect.height / 2;
+
+            let clientX, clientY;
+            if (e.touches && e.touches.length) {
+                clientX = e.touches[0].clientX;
+                clientY = e.touches[0].clientY;
+            } else {
+                clientX = e.clientX;
+                clientY = e.clientY;
+            }
+
+            // Rotation max ±12°
+            const rotateY = ((clientX - centerX) / (rect.width / 2)) * 12;
+            const rotateX = -((clientY - centerY) / (rect.height / 2)) * 12;
+
+            // Position du reflet en %
+            const mx = ((clientX - rect.left) / rect.width) * 100;
+            const my = ((clientY - rect.top) / rect.height) * 100;
+
+            // Angle pour le reflet holo
+            const angle = Math.atan2(clientY - centerY, clientX - centerX) * (180 / Math.PI) + 135;
+
+            card.style.transform = `rotateX(${rotateX}deg) rotateY(${rotateY}deg) scale(1.03)`;
+            card.style.setProperty('--mouse-x', `${mx}%`);
+            card.style.setProperty('--mouse-y', `${my}%`);
+            card.style.setProperty('--shine-angle', `${angle}deg`);
+        }
+
+        function handleEditionCardLeave(e) {
+            const card = e.currentTarget;
+            card.style.transform = '';
+        }
+
+        // Toggle collection + animation
+        function toggleEditionCard(cardNum, cardEl) {
+            if (editionCollected.has(cardNum)) {
+                // Décocher
+                editionCollected.delete(cardNum);
+                cardEl.classList.remove('collected');
+            } else {
+                // Cocher + animation
+                editionCollected.add(cardNum);
+                cardEl.classList.add('collected');
+
+                // Retirer et réappliquer la classe pour relancer l'animation
+                cardEl.classList.remove('validating');
+                // Forcer un reflow pour relancer l'animation
+                void cardEl.offsetWidth;
+                cardEl.classList.add('validating');
+                setTimeout(() => cardEl.classList.remove('validating'), 600);
+            }
+            saveEditionCollection();
+            updateEditionProgress();
+        }
+
+        // Réinitialiser la collection (avec confirmation)
+        function resetEditionCollection() {
+            if (editionCollected.size === 0) return;
+            if (!confirm('Réinitialiser ta collection ? Cette action est définitive.')) return;
+            editionCollected.clear();
+            saveEditionCollection();
+            document.querySelectorAll('.edition-card.collected').forEach(c => c.classList.remove('collected'));
+            updateEditionProgress();
+        }
+
+        // Anti-téléchargement global pour la page Édition 1
+        document.addEventListener('DOMContentLoaded', function() {
+            const editionPage = document.getElementById('page-edition1');
+            if (editionPage) {
+                editionPage.addEventListener('contextmenu', e => {
+                    if (e.target.closest('.edition-card') || e.target.classList.contains('edition-card-image')) {
+                        e.preventDefault();
+                    }
+                });
+            }
+        });
+
+        window.resetEditionCollection = resetEditionCollection;
+        window.toggleCartesDropdown = toggleCartesDropdown;
 
         window.showCharacterDetail = showCharacterDetail;
         window.closeCharacterDetail = closeCharacterDetail;
