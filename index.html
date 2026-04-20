@@ -2706,6 +2706,40 @@
                 text-align: center;
             }
 
+            /* Le dropdown doit se comporter comme un nav-btn en mobile */
+            .dropdown-wrapper {
+                flex: 1;
+            }
+
+            .dropdown-wrapper > .nav-btn {
+                flex: 1;
+                width: 100%;
+                height: 100%;
+            }
+
+            /* Cacher le caret sur mobile (plus de place avec l'icône au-dessus du texte) */
+            .dropdown-wrapper .nav-btn .dropdown-caret {
+                display: none;
+            }
+
+            /* Dropdown ancré à gauche du viewport pour ne pas déborder */
+            .dropdown-menu {
+                left: 0;
+                right: auto;
+                transform: translateX(0) translateY(-6px);
+                min-width: 150px;
+                padding: 4px;
+            }
+
+            .dropdown-wrapper.open .dropdown-menu {
+                transform: translateX(0) translateY(0);
+            }
+
+            .dropdown-item {
+                padding: 10px 14px;
+                font-size: 0.95em;
+            }
+
             .nav-btn .nav-icon {
                 width: 24px;
                 height: 24px;
@@ -3385,6 +3419,11 @@
         /* ============================================ */
         .dropdown-wrapper {
             position: relative;
+            display: flex;
+        }
+
+        .dropdown-wrapper > .nav-btn {
+            width: 100%;
         }
 
         .dropdown-wrapper .nav-btn .dropdown-caret {
@@ -3531,53 +3570,66 @@
             border-color: rgba(231, 76, 60, 0.4);
         }
 
+        /* Grille 6 colonnes desktop */
         .edition-grid {
             display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 25px;
+            grid-template-columns: repeat(6, 1fr);
+            gap: 14px;
             margin-bottom: 50px;
-            perspective: 1200px;
         }
 
+        /* Carte = wrapper avec perspective (comme .character-card) */
         .edition-card {
             position: relative;
             aspect-ratio: 2.5 / 3.5;
-            border-radius: 14px;
+            border-radius: 10px;
             cursor: pointer;
-            transform-style: preserve-3d;
-            transition: transform 0.3s ease, box-shadow 0.3s ease;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
-            overflow: hidden;
+            perspective: 1000px;
+            /* Optimisation de rendu : ne calcule que les cartes visibles */
+            content-visibility: auto;
+            contain-intrinsic-size: 180px 252px;
             /* Anti-téléchargement */
             -webkit-user-select: none;
             -moz-user-select: none;
-            -ms-user-select: none;
             user-select: none;
             -webkit-user-drag: none;
             -webkit-touch-callout: none;
         }
 
-        .edition-card:hover {
-            box-shadow: 0 20px 45px rgba(0, 0, 0, 0.7), 0 0 25px rgba(138, 43, 226, 0.25);
+        /* Inner qui tilt - exactement le même pattern que .character-card-inner */
+        .edition-card-inner {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            transition: transform 0.4s ease;
+            transform-style: preserve-3d;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.4);
+        }
+
+        .edition-card-inner.tilt {
+            transition: transform 0.1s ease-out;
         }
 
         /* Image rognée de ~5mm (≈6% sur chaque côté) via background-size */
         .edition-card-image {
             position: absolute;
             inset: 0;
-            border-radius: 14px;
+            border-radius: 10px;
             background-size: 112% 112%;
             background-position: center;
             background-repeat: no-repeat;
+            background-color: rgba(255, 255, 255, 0.03);
             pointer-events: none;
+            transition: filter 0.35s ease;
         }
 
         /* Bordure interne subtile */
-        .edition-card::before {
+        .edition-card-inner::before {
             content: '';
             position: absolute;
             inset: 0;
-            border-radius: 14px;
+            border-radius: 10px;
             border: 1px solid rgba(255, 255, 255, 0.08);
             pointer-events: none;
             z-index: 3;
@@ -3587,10 +3639,10 @@
         .edition-card.holographic .edition-holo-shine {
             position: absolute;
             inset: 0;
-            border-radius: 14px;
+            border-radius: 10px;
             pointer-events: none;
             background: linear-gradient(
-                var(--shine-angle, 135deg),
+                135deg,
                 transparent 0%,
                 rgba(255, 0, 150, 0.28) 18%,
                 rgba(0, 220, 255, 0.28) 35%,
@@ -3599,104 +3651,70 @@
                 rgba(160, 80, 255, 0.28) 82%,
                 transparent 100%
             );
+            background-size: 250% 250%;
             mix-blend-mode: color-dodge;
-            opacity: 0.55;
+            opacity: 0.5;
             z-index: 2;
             animation: holoShift 5s linear infinite;
+            transition: opacity 0.3s ease;
         }
 
         .edition-card.holographic .edition-holo-overlay {
             position: absolute;
             inset: 0;
-            border-radius: 14px;
+            border-radius: 10px;
             pointer-events: none;
             background: linear-gradient(
                 125deg,
                 transparent 0%,
-                transparent 25%,
-                rgba(255, 255, 255, 0.18) 30%,
-                rgba(255, 255, 255, 0.35) 40%,
-                rgba(255, 255, 255, 0.18) 50%,
-                transparent 55%,
+                transparent 30%,
+                rgba(255, 255, 255, 0.25) 45%,
+                transparent 60%,
                 transparent 100%
             );
-            background-size: 250% 250%;
+            background-size: 200% 200%;
             background-position: var(--mouse-x, 50%) var(--mouse-y, 50%);
             mix-blend-mode: overlay;
-            opacity: 0.7;
+            opacity: 0.55;
             z-index: 2;
         }
 
         .edition-card.holographic:hover .edition-holo-shine {
-            opacity: 0.85;
+            opacity: 0.8;
         }
 
         .edition-card.holographic:hover .edition-holo-overlay {
-            opacity: 1;
-        }
-
-        /* Reflet lumineux qui suit la souris (toutes les cartes) */
-        .edition-light {
-            position: absolute;
-            inset: 0;
-            border-radius: 14px;
-            pointer-events: none;
-            background: radial-gradient(
-                circle at var(--mouse-x, 50%) var(--mouse-y, 50%),
-                rgba(255, 255, 255, 0.25) 0%,
-                rgba(255, 255, 255, 0.08) 20%,
-                transparent 55%
-            );
-            mix-blend-mode: overlay;
-            opacity: 0;
-            transition: opacity 0.3s ease;
-            z-index: 2;
-        }
-
-        .edition-card:hover .edition-light {
-            opacity: 1;
+            opacity: 0.9;
         }
 
         @keyframes holoShift {
-            0%   { --shine-angle: 120deg; background-position: 0% 50%; }
-            50%  { --shine-angle: 160deg; background-position: 100% 50%; }
-            100% { --shine-angle: 120deg; background-position: 0% 50%; }
+            0%   { background-position: 0% 50%; }
+            50%  { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
         }
 
-        /* Fallback : navigateurs qui ne supportent pas l'animation de variables CSS */
-        @property --shine-angle {
-            syntax: '<angle>';
-            inherits: false;
-            initial-value: 135deg;
+        /* ======== ÉTAT "VALIDÉ / COLLECTÉ" = noir et blanc ======== */
+        .edition-card.collected .edition-card-image {
+            filter: grayscale(1) brightness(0.85);
         }
 
-        /* ======== ÉTAT "VALIDÉ / COLLECTÉ" ======== */
-        .edition-card.collected {
-            box-shadow: 0 10px 30px rgba(46, 204, 113, 0.45), 0 0 0 3px rgba(46, 204, 113, 0.7);
-        }
-
-        .edition-card.collected::after {
-            content: '';
-            position: absolute;
-            inset: 0;
-            border-radius: 14px;
-            background: radial-gradient(circle at 50% 40%, rgba(46, 204, 113, 0.18), transparent 70%);
-            pointer-events: none;
-            z-index: 4;
+        .edition-card.collected .edition-holo-shine,
+        .edition-card.collected .edition-holo-overlay {
+            opacity: 0 !important;
         }
 
         .edition-check {
             position: absolute;
-            top: 8px;
-            right: 8px;
-            width: 32px;
-            height: 32px;
+            top: 6px;
+            right: 6px;
+            width: 26px;
+            height: 26px;
             border-radius: 50%;
             background: linear-gradient(135deg, #27ae60, #2ecc71);
             display: flex;
             align-items: center;
             justify-content: center;
-            box-shadow: 0 4px 12px rgba(46, 204, 113, 0.6);
+            box-shadow: 0 3px 8px rgba(46, 204, 113, 0.55);
             transform: scale(0);
             opacity: 0;
             transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.3s ease;
@@ -3704,8 +3722,8 @@
         }
 
         .edition-check svg {
-            width: 18px;
-            height: 18px;
+            width: 14px;
+            height: 14px;
             stroke: #fff;
             stroke-width: 3;
             fill: none;
@@ -3718,39 +3736,46 @@
             opacity: 1;
         }
 
-        /* Animation de validation au clic */
+        /* Animation de validation au clic - juste sur l'inner, sans déborder */
         @keyframes validatePulse {
             0%   { transform: scale(1); }
-            35%  { transform: scale(1.08); box-shadow: 0 0 0 0 rgba(46, 204, 113, 0.9), 0 10px 30px rgba(46, 204, 113, 0.6); }
-            100% { transform: scale(1); box-shadow: 0 0 0 25px rgba(46, 204, 113, 0), 0 10px 30px rgba(0, 0, 0, 0.5); }
+            50%  { transform: scale(1.04); }
+            100% { transform: scale(1); }
         }
 
-        .edition-card.validating {
-            animation: validatePulse 0.55s ease-out;
+        .edition-card-inner.validating {
+            animation: validatePulse 0.45s ease-out;
         }
 
-        /* Le numéro de la carte (petit badge discret) */
+        /* Le numéro de la carte */
         .edition-card-number {
             position: absolute;
-            bottom: 8px;
-            left: 8px;
+            bottom: 6px;
+            left: 6px;
             background: rgba(0, 0, 0, 0.55);
             color: rgba(255, 255, 255, 0.9);
             font-family: 'Bebas Neue', sans-serif;
-            font-size: 0.85em;
+            font-size: 0.75em;
             letter-spacing: 1px;
-            padding: 2px 8px;
-            border-radius: 10px;
+            padding: 1px 6px;
+            border-radius: 8px;
             z-index: 5;
             pointer-events: none;
-            backdrop-filter: blur(4px);
-            -webkit-backdrop-filter: blur(4px);
+        }
+
+        /* ============ TABLETTE ============ */
+        @media (max-width: 1024px) {
+            .edition-grid {
+                grid-template-columns: repeat(4, 1fr);
+                gap: 12px;
+            }
         }
 
         /* ============ MOBILE ============ */
         @media (max-width: 768px) {
             .edition-grid {
-                gap: 10px;
+                grid-template-columns: repeat(3, 1fr);
+                gap: 8px;
             }
 
             .edition-title {
@@ -3777,46 +3802,23 @@
                 font-size: 0.7em;
             }
 
-            .edition-card {
-                border-radius: 10px;
-            }
-
-            .edition-card-image,
-            .edition-card::before,
-            .edition-card.holographic .edition-holo-shine,
-            .edition-card.holographic .edition-holo-overlay,
-            .edition-light,
-            .edition-card.collected::after {
-                border-radius: 10px;
-            }
-
             .edition-check {
-                width: 24px;
-                height: 24px;
-                top: 5px;
-                right: 5px;
+                width: 22px;
+                height: 22px;
+                top: 4px;
+                right: 4px;
             }
 
             .edition-check svg {
-                width: 13px;
-                height: 13px;
+                width: 12px;
+                height: 12px;
             }
 
             .edition-card-number {
-                font-size: 0.7em;
-                padding: 1px 6px;
-                bottom: 5px;
-                left: 5px;
-            }
-
-            .dropdown-menu {
-                min-width: 160px;
-                padding: 4px;
-            }
-
-            .dropdown-item {
-                padding: 10px 14px;
-                font-size: 0.95em;
+                font-size: 0.65em;
+                padding: 1px 5px;
+                bottom: 4px;
+                left: 4px;
             }
         }
     </style>
@@ -5519,15 +5521,17 @@
                 html += `
                     <div class="edition-card${isHolo ? ' holographic' : ''}${isCollected ? ' collected' : ''}"
                          data-card="${i}"
+                         data-img="${imgPath}"
                          draggable="false"
                          oncontextmenu="return false">
-                        <div class="edition-card-image" style="background-image: url('${imgPath}');"></div>
-                        ${isHolo ? '<div class="edition-holo-shine"></div><div class="edition-holo-overlay"></div>' : ''}
-                        <div class="edition-light"></div>
-                        <div class="edition-check" aria-label="Collectée">
-                            <svg viewBox="0 0 24 24"><polyline points="5 13 10 18 20 7"></polyline></svg>
+                        <div class="edition-card-inner">
+                            <div class="edition-card-image"></div>
+                            ${isHolo ? '<div class="edition-holo-shine"></div><div class="edition-holo-overlay"></div>' : ''}
+                            <div class="edition-check" aria-label="Collectée">
+                                <svg viewBox="0 0 24 24"><polyline points="5 13 10 18 20 7"></polyline></svg>
+                            </div>
+                            <div class="edition-card-number">${String(i).padStart(2, '0')}</div>
                         </div>
-                        <div class="edition-card-number">${String(i).padStart(2, '0')}</div>
                     </div>
                 `;
             }
@@ -5535,24 +5539,58 @@
 
             updateEditionProgress();
             attachEditionCardEvents();
+            setupEditionLazyLoad();
+        }
+
+        // Lazy-load des images de fond : on ne charge que les cartes visibles (ou proches)
+        function setupEditionLazyLoad() {
+            const cards = document.querySelectorAll('.edition-card[data-img]');
+            if (!('IntersectionObserver' in window)) {
+                // Fallback : charger tout directement
+                cards.forEach(card => {
+                    const img = card.querySelector('.edition-card-image');
+                    if (img) img.style.backgroundImage = `url('${card.dataset.img}')`;
+                    card.removeAttribute('data-img');
+                });
+                return;
+            }
+
+            const io = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (!entry.isIntersecting) return;
+                    const card = entry.target;
+                    const img = card.querySelector('.edition-card-image');
+                    const src = card.dataset.img;
+                    if (img && src) {
+                        img.style.backgroundImage = `url('${src}')`;
+                    }
+                    card.removeAttribute('data-img');
+                    io.unobserve(card);
+                });
+            }, {
+                // Charger les images un peu avant qu'elles soient visibles
+                rootMargin: '300px 0px',
+                threshold: 0.01
+            });
+
+            cards.forEach(card => io.observe(card));
         }
 
         // Attacher les événements 3D + clic sur chaque carte
         function attachEditionCardEvents() {
             const cards = document.querySelectorAll('.edition-card');
             cards.forEach(card => {
-                // Tilt 3D au mouvement
-                card.addEventListener('mousemove', handleEditionCardMove);
-                card.addEventListener('mouseleave', handleEditionCardLeave);
+                const inner = card.querySelector('.edition-card-inner');
+                if (!inner) return;
 
-                // Touch mobile : tilt léger
-                card.addEventListener('touchmove', handleEditionCardMove, { passive: true });
-                card.addEventListener('touchend', handleEditionCardLeave);
+                // Tilt 3D au mouvement (souris uniquement - pas de tilt au toucher pour garder le clic fluide)
+                card.addEventListener('mousemove', (e) => handleEditionCardMove(e, card, inner));
+                card.addEventListener('mouseleave', () => handleEditionCardLeave(card, inner));
 
                 // Clic = toggle collection
-                card.addEventListener('click', function(e) {
+                card.addEventListener('click', function() {
                     const cardNum = parseInt(this.dataset.card, 10);
-                    toggleEditionCard(cardNum, this);
+                    toggleEditionCard(cardNum, this, inner);
                 });
 
                 // Bloquer le drag de l'image
@@ -5560,45 +5598,34 @@
             });
         }
 
-        function handleEditionCardMove(e) {
-            const card = e.currentTarget;
+        function handleEditionCardMove(e, card, inner) {
             const rect = card.getBoundingClientRect();
             const centerX = rect.left + rect.width / 2;
             const centerY = rect.top + rect.height / 2;
 
-            let clientX, clientY;
-            if (e.touches && e.touches.length) {
-                clientX = e.touches[0].clientX;
-                clientY = e.touches[0].clientY;
-            } else {
-                clientX = e.clientX;
-                clientY = e.clientY;
+            // Rotation max ±10° (identique à la page Cartes)
+            const rotateY = ((e.clientX - centerX) / (rect.width / 2)) * 10;
+            const rotateX = -((e.clientY - centerY) / (rect.height / 2)) * 10;
+
+            // Position du reflet holo (uniquement pour les cartes holographiques)
+            if (card.classList.contains('holographic')) {
+                const mx = ((e.clientX - rect.left) / rect.width) * 100;
+                const my = ((e.clientY - rect.top) / rect.height) * 100;
+                card.style.setProperty('--mouse-x', `${mx}%`);
+                card.style.setProperty('--mouse-y', `${my}%`);
             }
 
-            // Rotation max ±12°
-            const rotateY = ((clientX - centerX) / (rect.width / 2)) * 12;
-            const rotateX = -((clientY - centerY) / (rect.height / 2)) * 12;
-
-            // Position du reflet en %
-            const mx = ((clientX - rect.left) / rect.width) * 100;
-            const my = ((clientY - rect.top) / rect.height) * 100;
-
-            // Angle pour le reflet holo
-            const angle = Math.atan2(clientY - centerY, clientX - centerX) * (180 / Math.PI) + 135;
-
-            card.style.transform = `rotateX(${rotateX}deg) rotateY(${rotateY}deg) scale(1.03)`;
-            card.style.setProperty('--mouse-x', `${mx}%`);
-            card.style.setProperty('--mouse-y', `${my}%`);
-            card.style.setProperty('--shine-angle', `${angle}deg`);
+            inner.classList.add('tilt');
+            inner.style.transform = `rotateX(${rotateX}deg) rotateY(${rotateY}deg)`;
         }
 
-        function handleEditionCardLeave(e) {
-            const card = e.currentTarget;
-            card.style.transform = '';
+        function handleEditionCardLeave(card, inner) {
+            inner.classList.remove('tilt');
+            inner.style.transform = 'rotateY(0deg) rotateX(0deg)';
         }
 
         // Toggle collection + animation
-        function toggleEditionCard(cardNum, cardEl) {
+        function toggleEditionCard(cardNum, cardEl, innerEl) {
             if (editionCollected.has(cardNum)) {
                 // Décocher
                 editionCollected.delete(cardNum);
@@ -5608,12 +5635,11 @@
                 editionCollected.add(cardNum);
                 cardEl.classList.add('collected');
 
-                // Retirer et réappliquer la classe pour relancer l'animation
-                cardEl.classList.remove('validating');
-                // Forcer un reflow pour relancer l'animation
-                void cardEl.offsetWidth;
-                cardEl.classList.add('validating');
-                setTimeout(() => cardEl.classList.remove('validating'), 600);
+                // Relancer l'animation de validation sur l'inner
+                innerEl.classList.remove('validating');
+                void innerEl.offsetWidth; // forcer un reflow
+                innerEl.classList.add('validating');
+                setTimeout(() => innerEl.classList.remove('validating'), 500);
             }
             saveEditionCollection();
             updateEditionProgress();
